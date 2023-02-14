@@ -1,0 +1,177 @@
+; This is the Calva evaluation results output window.
+; TIPS: The keyboard shortcut `ctrl+alt+o o` shows and focuses this window
+;   when connected to a REPL session.
+; Please see https://calva.io/output/ for more info.
+; Happy coding! ♥️
+
+; Jacking in...
+; Starting Jack-in Terminal: npx shadow-cljs -d cider/cider-nrepl:0.28.5 watch :app
+; Hooking up nREPL sessions...
+; Connected session: clj
+; TIPS:
+;   - You can edit the contents here. Use it as a REPL if you like.
+;   - `alt+enter` evaluates the current top level form.
+;   - `ctrl+enter` evaluates the current form.
+;   - `alt+up` and `alt+down` traverse up and down the REPL command history
+;      when the cursor is after the last contents at the prompt
+;   - Clojure lines in stack traces are peekable and clickable.
+clj꞉shadow.user꞉>  ; Use `alt+enter` to evaluate
+; Creating cljs repl session...
+; Connecting cljs repl: shadow-cljs...
+;   The Calva Connection Log might have more connection progress information.
+; Connected session: cljs, repl: :app
+; TIPS: You can choose which REPL to use (clj or cljs):
+;    *Calva: Toggle REPL connection*
+;    (There is a button in the status bar for this)
+; Jack-in done.
+cljs꞉cljs.user꞉>  ; Use `alt+enter` to evaluate
+(.includes ["text" "inc"] "text")
+:repl/exception!
+; 
+; Execution error (TypeError) at (<cljs repl>:1).
+; (intermediate value).includes is not a function
+cljs꞉cljs.user꞉> 
+(.includes)
+nil
+; ------ REPL Error while processing ---------------------------------------------
+; (.includes)
+; null
+; Cannot use dot form on nil
+; {:form (. nil includes)}
+; ExceptionInfo: Cannot use dot form on nil
+; 	shadow.build.cljs-hacks/shadow-analyze-dot (cljs_hacks.cljc:478)
+; 	shadow.build.cljs-hacks/shadow-analyze-dot (cljs_hacks.cljc:476)
+; 	shadow.build.cljs-hacks/install-hacks!/fn--10339 (cljs_hacks.cljc:1138)
+; 	clojure.lang.MultiFn.invoke (MultiFn.java:252)
+; 	cljs.analyzer/analyze-seq* (analyzer.cljc:4080)
+; 	cljs.analyzer/analyze-seq* (analyzer.cljc:4078)
+; 	cljs.analyzer/analyze-seq*-wrap (analyzer.cljc:4085)
+; 	cljs.analyzer/analyze-seq*-wrap (analyzer.cljc:4083)
+; 	cljs.analyzer/analyze-seq (analyzer.cljc:4109)
+; 	cljs.analyzer/analyze-seq (analyzer.cljc:4087)
+; 	cljs.analyzer/analyze-form (analyzer.cljc:4296)
+; 	cljs.analyzer/analyze-form (analyzer.cljc:4293)
+; 	cljs.analyzer/analyze* (analyzer.cljc:4349)
+; 	cljs.analyzer/analyze* (analyzer.cljc:4341)
+; 	cljs.analyzer/analyze (analyzer.cljc:4369)
+; 	cljs.analyzer/analyze (analyzer.cljc:4352)
+; 	cljs.analyzer/analyze-seq (analyzer.cljc:4110)
+; 	cljs.analyzer/analyze-seq (analyzer.cljc:4087)
+; 	cljs.analyzer/analyze-form (analyzer.cljc:4296)
+; 	cljs.analyzer/analyze-form (analyzer.cljc:4293)
+; 	cljs.analyzer/analyze* (analyzer.cljc:4349)
+; 	cljs.analyzer/analyze* (analyzer.cljc:4341)
+; 	shadow.build.compiler/analyze/fn--13229 (compiler.clj:264)
+; 	shadow.build.compiler/analyze (compiler.clj:252)
+; 	shadow.build.compiler/analyze (compiler.clj:211)
+; 	shadow.cljs.repl/repl-compile/fn--14919/fn--14920 (repl.clj:475)
+; 	shadow.cljs.repl/repl-compile/fn--14919 (repl.clj:448)
+; 	shadow.cljs.repl/repl-compile (repl.clj:446)
+; 	shadow.cljs.repl/repl-compile (repl.clj:443)
+; 	shadow.cljs.repl/process-read-result (repl.clj:534)
+; 	shadow.cljs.repl/process-read-result (repl.clj:510)
+; 	shadow.cljs.repl/process-input (repl.clj:673)
+; 	shadow.cljs.repl/process-input (repl.clj:651)
+; 	shadow.cljs.devtools.server.worker.impl/fn--15445 (impl.clj:698)
+; 	shadow.cljs.devtools.server.worker.impl/fn--15445 (impl.clj:688)
+; 	clojure.lang.MultiFn.invoke (MultiFn.java:234)
+; 	shadow.cljs.devtools.server.util/server-thread/fn--15119/fn--15120/fn--15128 (util.clj:283)
+; 	shadow.cljs.devtools.server.util/server-thread/fn--15119/fn--15120 (util.clj:282)
+; 	shadow.cljs.devtools.server.util/server-thread/fn--15119 (util.clj:255)
+; 	java.lang.Thread.run (Thread.java:834)
+; 
+cljs꞉cljs.user꞉> 
+(. includes ["text" "inc"] "text")
+nil
+; ------ REPL Error while processing ---------------------------------------------
+; (. includes ["text" "inc"] "text")
+; null
+; invalid dot form
+; {:form (. includes ["text" "inc"] "text")}
+; ExceptionInfo: invalid dot form
+; 	shadow.build.cljs-hacks/shadow-analyze-dot (cljs_hacks.cljc:540)
+; 	shadow.build.cljs-hacks/shadow-analyze-dot (cljs_hacks.cljc:476)
+; 	shadow.build.cljs-hacks/install-hacks!/fn--10339 (cljs_hacks.cljc:1138)
+; 	clojure.lang.MultiFn.invoke (MultiFn.java:252)
+; 	cljs.analyzer/analyze-seq* (analyzer.cljc:4080)
+; 	cljs.analyzer/analyze-seq* (analyzer.cljc:4078)
+; 	cljs.analyzer/analyze-seq*-wrap (analyzer.cljc:4085)
+; 	cljs.analyzer/analyze-seq*-wrap (analyzer.cljc:4083)
+; 	cljs.analyzer/analyze-seq (analyzer.cljc:4109)
+; 	cljs.analyzer/analyze-seq (analyzer.cljc:4087)
+; 	cljs.analyzer/analyze-form (analyzer.cljc:4296)
+; 	cljs.analyzer/analyze-form (analyzer.cljc:4293)
+; 	cljs.analyzer/analyze* (analyzer.cljc:4349)
+; 	cljs.analyzer/analyze* (analyzer.cljc:4341)
+; 	shadow.build.compiler/analyze/fn--13229 (compiler.clj:264)
+; 	shadow.build.compiler/analyze (compiler.clj:252)
+; 	shadow.build.compiler/analyze (compiler.clj:211)
+; 	shadow.cljs.repl/repl-compile/fn--14919/fn--14920 (repl.clj:475)
+; 	shadow.cljs.repl/repl-compile/fn--14919 (repl.clj:448)
+; 	shadow.cljs.repl/repl-compile (repl.clj:446)
+; 	shadow.cljs.repl/repl-compile (repl.clj:443)
+; 	shadow.cljs.repl/process-read-result (repl.clj:534)
+; 	shadow.cljs.repl/process-read-result (repl.clj:510)
+; 	shadow.cljs.repl/process-input (repl.clj:673)
+; 	shadow.cljs.repl/process-input (repl.clj:651)
+; 	shadow.cljs.devtools.server.worker.impl/fn--15445 (impl.clj:698)
+; 	shadow.cljs.devtools.server.worker.impl/fn--15445 (impl.clj:688)
+; 	clojure.lang.MultiFn.invoke (MultiFn.java:234)
+; 	shadow.cljs.devtools.server.util/server-thread/fn--15119/fn--15120/fn--15128 (util.clj:283)
+; 	shadow.cljs.devtools.server.util/server-thread/fn--15119/fn--15120 (util.clj:282)
+; 	shadow.cljs.devtools.server.util/server-thread/fn--15119 (util.clj:255)
+; 	java.lang.Thread.run (Thread.java:834)
+; 
+cljs꞉cljs.user꞉> 
+(.includes '("text" "inc") "text")
+:repl/exception!
+; 
+; Execution error (TypeError) at (<cljs repl>:1).
+; cljs.core.list(...).includes is not a function
+cljs꞉cljs.user꞉> 
+(.includes js/["text" "inc"] "text")
+"text"
+; [line 1, col 15] Invalid symbol: js/.
+; [line 1, col 2] Unmatched delimiter ].
+; [line 1, col 2] Unmatched delimiter ).
+cljs꞉cljs.user꞉> 
+(.includes js/["text" "inc"] "te")
+"te"
+; [line 1, col 15] Invalid symbol: js/.
+; [line 1, col 2] Unmatched delimiter ].
+; [line 1, col 2] Unmatched delimiter ).
+cljs꞉cljs.user꞉> 
+(.includes js/["text" "inc"] js/"text")
+nil
+; [line 1, col 15] Invalid symbol: js/.
+; [line 1, col 2] Unmatched delimiter ].
+; [line 1, col 5] Invalid symbol: js/.
+; ------ WARNING - :undeclared-var -----------------------------------------------
+;  Resource: <eval>:1:1
+;  Use of undeclared Var cljs.user/text
+; --------------------------------------------------------------------------------
+; 
+; 
+; [line 1, col 2] Unmatched delimiter ).
+cljs꞉cljs.user꞉> 
+(contains? ["text" "inc"] "text")
+false
+cljs꞉cljs.user꞉> 
+(contains? '("text" "inc") "text")
+false
+cljs꞉cljs.user꞉> 
+(contains? (set '("text" "inc")) "tex")
+true
+cljs꞉cljs.user꞉> 
+(contains? (set ["text" "set"]) "tex")
+false
+cljs꞉cljs.user꞉> 
+(contains? (set ["text" "set"]) "tex")
+false
+cljs꞉cljs.user꞉> 
+(contains? (set ["text" "set"]) "text")
+true
+cljs꞉cljs.user꞉> 
+(contains? (set ["text" "set"]) "set")
+true
+cljs꞉cljs.user꞉> 
