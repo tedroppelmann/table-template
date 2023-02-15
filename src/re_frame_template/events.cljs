@@ -76,19 +76,15 @@
 (re-frame/reg-event-fx
  ::cancel-filter
  (fn [{:keys [db]} [_ key]]
-   {:db (update-in db [:query-map :filter-by] dissoc key)
-    :dispatch [::create-query]}))
+   (when (-> db :query-map :filter-by key)
+     {:db (update-in db [:query-map :filter-by] dissoc key)
+      :dispatch [::create-query]})))
 
 (re-frame/reg-event-db
  ::sort
  (fn [db [_ key]]
    (assoc-in db [:query-map :sort-by key] {:field-name (name key)
                                            :order "asc"})))
-
-(re-frame/reg-event-db
- ::sort2
- (fn [db [_ key]]
-   ))
 
 (re-frame/reg-event-db
  ::print

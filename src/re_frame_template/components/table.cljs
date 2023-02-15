@@ -6,10 +6,10 @@
    [reagent.core :as r]))
 
 
-(defn FilterInput [filter-input key]
+(defn FilterInput [{:keys [filter-input name]}]
   [:input.form-control.mt-3
    {:type "text"
-    :placeholder (str "Filter by " (name key))
+    :placeholder (str "Filter by " name)
     :value @filter-input
     :on-change #(reset! filter-input (-> % .-target .-value))}])
 
@@ -54,7 +54,7 @@
    {:role "alert"}
    @error])
 
-(defn FilterBox [{:keys [key type]} filter-options]
+(defn FilterBox [{:keys [key type name]} filter-options]
   (let [filter-input (r/atom "")
         dropdown-selection (r/atom (first filter-options))
         filter-input-max (r/atom "")
@@ -63,10 +63,10 @@
       [:div.d-flex.flex-column
        (when @error
          [ErrorAlert error])
-       [FilterInput filter-input key]
+       [FilterInput {:filter-input filter-input :name name}]
        [FilterDropdown dropdown-selection filter-options]
        (when (:two-inputs @dropdown-selection)
-        [FilterInput filter-input-max key])
+        [FilterInput {:filter-input filter-input-max :name name}])
        [FilterConfirmation filter-input key type dropdown-selection filter-input-max error]])))
 
 (defn SortButton [key]
@@ -85,35 +85,61 @@
     :value "Print filter params"
     :on-click #(re-frame/dispatch [::events/print])}])
 
-(defn Headers [headers filter-options]
+(defn NestedHeader [{:keys [header filter-options]}]
+  (let [fields (:fields header)
+        field-selected (r/atom (first fields))]
+    (fn []
+      [:th {:style (:style header)}
+       (into [:div] (map
+                     (fn [element]
+                       [:div
+                        {:type "button"
+                         :style {:font-weight (when (not= @field-selected element) "normal")}
+                         :on-click (fn [] 
+                                     (re-frame/dispatch [::events/cancel-filter (:key @field-selected)])
+                                     (reset! field-selected element))}
+                        (:name element)])
+                     (:fields header)))
+       (when (:filtered? @field-selected)
+         [FilterBox @field-selected (filter #(contains? (set (:types %)) (:type @field-selected)) filter-options)])])))
+
+(defn NormalHeader [{:keys [header filter-options]}]
+  [:th {:style (:style header)}
+   (:name header)
+   (when (:sorted? header)
+     [SortButton (:key header)])
+   (when (:filtered? header) 
+     [FilterBox header (filter #(contains? (set (:types %)) (:type header)) filter-options)])])
+
+(defn Headers [{:keys [columns filter-options]}]
   [:thead
    (into [:tr] (map 
-                (fn [header] 
-                  [:th {:style (:style header)} (:name header)
-                   (when (:sorted? header)
-                     [SortButton (:key header)])]) 
-                headers))
-   (into [:tr] (map 
-                (fn [header] 
-                  [:th
-                   (when (:filtered? header)
-                     [FilterBox header (filter #(contains? (set (:types %)) (:type header)) filter-options)])]) 
-                headers))])
+                (fn [header]
+                  (if (:nested? header)
+                    [NestedHeader {:header header :filter-options filter-options}]
+                    [NormalHeader {:header header :filter-options filter-options}])) 
+                columns))])
 
-(defn Row [row & params]
-  (into [:tr] (map (fn [param] [:td (param row)]) params)))
+(defn Row [{:keys [row columns]}]
+  (into [:tr] (map
+               (fn [column]
+                 (if (:nested? column)
+                   (into [:td] (map (fn [element] [:div ((:key element) row)]) (:fields column)))
+                   [:td ((:key column) row)]))
+               columns)))
 
 (defn Table [{:keys [columns filter-options]}]
-  (let [elements (re-frame/subscribe [::subs/data])]
+  (let [data (re-frame/subscribe [::subs/data])
+        columns-filtered (filter #(not (:hidden %)) columns)] 
     (fn []
       [:div
        [Print]
        [:table.table.table-striped.table-responsive
-        [Headers columns filter-options] 
+        [Headers {:columns columns-filtered :filter-options filter-options}] 
         (when (not @(re-frame/subscribe [::subs/data-loading?]))
           [:tbody
-           (for [element @elements]
+           (for [element @data]
              ^{:key (:id element)}
-             [Row element :id :name :ibu :first_brewed :tagline])])]
+             [Row {:row element :columns columns-filtered}])])]
        (when @(re-frame/subscribe [::subs/data-loading?])
          [:h3.text-center "Loading..."])])))
