@@ -4,101 +4,105 @@
    [re-frame-template.events :as events]
    [reagent.core :as r]))
 
-(defn FilterInput [{:keys [filter-input name]}]
+
+(defn FilterInput [{:keys [filter-state filter-input-type]}]
   [:input.form-control
    {:type "text"
-    :placeholder (str "Filter by " name)
-    :value @filter-input
-    :on-change #(reset! filter-input (-> % .-target .-value))}])
+    :placeholder (str "Filter by " (-> @filter-state :filter-field-selected :label))
+    :value (filter-input-type @filter-state)
+    :on-change (fn [e]
+                 (swap! filter-state assoc filter-input-type (-> e .-target .-value)))}])
 
-(defn FilterDropdown [dropdown-selection filter-options]
+(defn FilterDropdown [{:keys [filter-state]}]
   [:div.dropdown.mt-3
    [:button.btn.dropdown-toggle.w-100
     {:type "button"
      :data-bs-toggle "dropdown"
      :aria-expanded "false"}
-    (:name @dropdown-selection)]
-   (into [:ul.dropdown-menu]
-         (map
-          (fn [filter]
-            [:li>a.dropdown-item
-             {:type "button"
-              :on-click #(reset! dropdown-selection filter)}
-             (:name filter)])
-          filter-options))])
-
-(defn FilterConfirmation [filter-input accessor type dropdown-selection filter-input-max error]
-  [:div.d-flex.flex-row.justify-content-end.mt-3
-   [:button.btn.btn-danger.mr-2
-    {:type "button"
-     :on-click (fn []
-                 (re-frame/dispatch [::events/cancel-filter accessor])
-                 (reset! filter-input "")
-                 (reset! filter-input-max "")
-                 (reset! error false))}
-    "Cancel"]
-   [:button.btn.btn-primary
-    {:type "button"
-     :on-click (fn []
-                 (if (or (= @filter-input "") (and (:two-inputs @dropdown-selection) (= @filter-input-max "")))
-                   (reset! error "Empty input")
-                   (do
-                     (re-frame/dispatch [::events/filter accessor type @filter-input (:key @dropdown-selection) @filter-input-max])
-                     (reset! error false))))}
-    "Filter"]])
-
-(defn FilterErrorAlert [error]
-  [:div.alert.alert-danger
-   {:role "alert"}
-   @error])
-
-(defn FilterFieldSelector [{:keys [filter-field-selected filter-fields filter-input dropdown-options filter-options dropdown-selection]}]
-  [:div.btn-group.dropend.ml-2
-   [:button.btn.dropdown-toggle
-    {:type "button"
-     :data-bs-toggle "dropdown"
-     :aria-expanded "false"}]
+    (-> @filter-state :dropdown-selection :name)]
    (into [:ul.dropdown-menu]
          (map
           (fn [filter]
             [:li>a.dropdown-item
              {:type "button"
               :on-click (fn []
-                          (let [fil (filter #(contains? (set (:types %)) (:type filter)) filter-options)]
-                            (re-frame/dispatch [::events/cancel-filter (:accessor @filter-field-selected)])
-                            (reset! filter-field-selected filter)
-                            (reset! dropdown-selection (first fil))
-                            (reset! filter-input "")))}
-             (:label filter)])
+                          (swap! filter-state assoc :dropdown-selection filter))}
+             (:name filter)])
+          (-> @filter-state :filter-options)))])
+
+(defn FilterConfirmation [{:keys [filter-state]}]
+  [:div.d-flex.flex-row.justify-content-end.mt-3
+   [:button.btn.btn-danger.mr-2
+    {:type "button"
+     :on-click (fn [] 
+                 (re-frame/dispatch [::events/cancel-filter (-> @filter-state :filter-field-selected :accessor)])
+                 (swap! filter-state assoc 
+                        :filter-input ""
+                        :filter-input-max ""
+                        :error false))}
+    "Cancel"]
+   [:button.btn.btn-primary
+    {:type "button"
+     :on-click (fn []
+                 (if (or (= (-> @filter-state :filter-input) "") 
+                         (and (-> @filter-state :dropdown-selection :two-inputs)
+                              (= (-> @filter-state :filter-input-max) "")))
+                   (swap! filter-state assoc :error "Empty input")
+                   (do
+                     (re-frame/dispatch [::events/filter 
+                                         (-> @filter-state :filter-field-selected :accessor) 
+                                         (-> @filter-state :filter-field-selected :type) 
+                                         (-> @filter-state :filter-input) 
+                                         (-> @filter-state :dropdown-selection :key) 
+                                         (-> @filter-state :filter-input-max)])
+                     (swap! filter-state assoc :error false))))}
+    "Filter"]])
+
+(defn FilterErrorAlert [{:keys [filter-state]}]
+  [:div.alert.alert-danger
+   {:role "alert"}
+   (-> @filter-state :error)])
+
+(defn FilterFieldSelector [{:keys [filter-state filter-fields filter-options]}]
+  [:div.btn-group.dropend.ml-2.align-self-start
+   [:button.btn.dropdown-toggle
+    {:type "button"
+     :data-bs-toggle "dropdown"
+     :aria-expanded "false"}]
+   (into [:ul.dropdown-menu]
+         (map
+          (fn [filter-field]
+            [:li>a.dropdown-item
+             {:type "button"
+              :on-click (fn []
+                          (let [options (filter #(contains? (set (:types %)) (:type filter-field)) filter-options)]
+                            (re-frame/dispatch [::events/cancel-filter (-> @filter-state :filter-field-selected :accessor)])
+                            (swap! filter-state assoc 
+                                   :filter-input ""
+                                   :filter-field-selected filter-field
+                                   :filter-options options
+                                   :dropdown-selection (first options))))}
+             (:label filter-field)])
           filter-fields))])
 
 (defn FilterBox [filter-fields filter-options]
-  (let [filter-state (r/atom {:filter-input ""
+  (let [options (filter #(contains? (set (:types %)) (:type (first filter-fields))) filter-options)
+        filter-state (r/atom {:filter-input ""
                               :filter-input-max ""
                               :error false
                               :filter-field-selected (first filter-fields)
-                              :dropdown-selection (first (filter #(contains? (set (:types %)) (:type (first filter-fields))) filter-options))})
-        filter-input (r/atom "")
-        filter-input-max (r/atom "")
-        error (r/atom false)
-        filter-field-selected (r/atom (first filter-fields))
-        dropdown-options (r/atom (filter #(contains? (set (:types %)) (:type @filter-field-selected)) filter-options))
-        dropdown-selection (r/atom (first @dropdown-options))]
-    (fn []
+                              :filter-options options
+                              :dropdown-selection (first options)})]
+    (fn [] 
       [:div.d-flex.flex-column
-       (when @error
-         [FilterErrorAlert error])
+       (when (-> @filter-state :error)
+         [FilterErrorAlert {:filter-state filter-state}])
        [:div.d-flex.flex-row
-        [FilterInput {:filter-input filter-input
-                      :name (:label @filter-field-selected)}]
-        [FilterFieldSelector {:filter-field-selected filter-field-selected
-                              :filter-fields filter-fields
-                              :filter-input filter-input
-                              :dropdown-options dropdown-options
-                              :dropdown-selection dropdown-selection
-                              :filter-options filter-options}]]
-       [FilterDropdown dropdown-selection (filter #(contains? (set (:types %)) (:type @filter-field-selected)) filter-options)]
-       (when (:two-inputs @dropdown-selection)
-         [:div.mt-3
-          [FilterInput {:filter-input filter-input-max :name (:label @filter-field-selected)}]])
-       [FilterConfirmation filter-input (:accessor @filter-field-selected) (:type @filter-field-selected) dropdown-selection filter-input-max error]])))
+        [:div.d-flex.flex-column 
+         [FilterInput {:filter-state filter-state :filter-input-type :filter-input}]
+         [FilterDropdown {:filter-state filter-state}]
+         (when (-> @filter-state :dropdown-selection :two-inputs)
+           [:div.mt-3
+            [FilterInput {:filter-state filter-state :filter-input-type :filter-input-max}]])
+         [FilterConfirmation {:filter-state filter-state}]]
+        [FilterFieldSelector {:filter-state filter-state :filter-fields filter-fields :filter-options filter-options}]]])))

@@ -41,7 +41,7 @@
     }])
 
 (defonce filter-options
-  [{:name "Equals" :key "equals" :types ["text" "number" "date"]}
+  [{:name "Equals" :key "equals" :types ["number" "date"]}
    {:name "Contains" :key "contains" :types ["text" "number"]}
    {:name "Between" :key "between" :types ["number" "date"] :two-inputs true}
    {:name "Greater than" :key "greater-than" :types ["number" "date"]}
