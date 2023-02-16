@@ -2,16 +2,43 @@
   (:require 
    [re-frame-template.components.table :as table]))
 
+(defn Header [{:keys [headers]}]
+  (into [:div]
+        (map
+         (fn [header]
+           [:div header])
+         headers)))
+
+(defn Footer []
+  [:div "Test"])
+
 (defonce columns
-  [{:name "Id" :style {:width "15%"} :key :id :type "number" :sorted? false :filtered? false}
-   {:name "Name" :style {:width "30%"} :key :name :type "text" :sorted? false :filtered? true}
-   {:name "IBU" :style {:width "10%"} :key :ibu :type "number" :sorted? false :filtered? true}
-   {:name "First brewed" :style {:width "10%"} :key :first_brewed :type "date" :sorted? false :filtered? false :hidden true}
-   {:name "Tagline" :style {:width "30%"} :key :tagline :type "text" :sorted? false :filtered? false}
-   {:name "Data" :style {:width "30%"} :key :data :type "text" :sorted? false :filtered? false :nested? true 
-    :fields [{:name "Name" :style {} :key :name :type "text" :sorted? false :filtered? true}
-             {:name "IBU" :style {} :key :ibu :type "number" :sorted? false :filtered? true}
-             {:name "First brewed" :style {} :key :first_brewed :type "date" :sorted? false :filtered? false}]}])
+  [{:Header (Header {:headers ["Id"]})
+    :accessor :id
+    }
+   {:Header (Header {:headers ["Name" "IBU"]})
+    :accessor :name
+    :filter-fields [{:label "Name" :accessor :name :type "text"}
+                    {:label "IBU" :accessor :ibu :type "number"}]
+    :Cell (fn [{:keys [row value]}]
+            [:div
+             value
+             [:br]
+             [:button.btn.btn-primary (:ibu row)]])
+    }
+   {:Header (Header {:headers ["IBU"]}) 
+    :accessor :ibu
+    :Footer Footer
+    }
+   {:Header (Header {:headers ["Tagline" "Brewers tips"]})
+    :accessor :tagline
+    ;; :filter-fields [{:label "Tagline" :accessor :tagline :type "text"}]
+    :Cell (fn [{:keys [row value]}]
+            [:div
+             value
+             [:p]
+             (:brewers_tips row)])
+    }])
 
 (defonce filter-options
   [{:name "Equals" :key "equals" :types ["text" "number" "date"]}
