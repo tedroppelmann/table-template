@@ -48,19 +48,22 @@
  ::create-query
  (fn [{:keys [db]} [_]]
    {:dispatch [::handler-with-http 
-               (reduce
-                (fn [endpoint v]
-                  (let [value (last v)]
-                    (if (= "name" (:field-name value))
-                      (if (= (-> value :input-value) "")
-                        (str endpoint)
-                        (str endpoint "beer_name=" (:input-value value) "&"))
-                      (if (and (= "ibu" (:field-name value)) (= "between" (:comparator value)))
-                        (if (or (= (-> value :input-value) "") (= "" (:max-input-value value)))
+               (let [page-number (-> db :query-map :page-number)
+                     page-size (-> db :query-map :page-size)
+                     initial (str "https://api.punkapi.com/v2/beers?page=" page-number "&per_page=" page-size "&")]
+                 (reduce
+                  (fn [endpoint v]
+                    (let [value (last v)]
+                      (if (= "name" (:field-name value))
+                        (if (= (-> value :input-value) "")
                           (str endpoint)
-                          (str endpoint "ibu_gt=" (:input-value value) "&" "ibu_lt=" (:max-input-value value) "&"))
-                        (str endpoint)))))
-                "https://api.punkapi.com/v2/beers?" (-> db :query-map :filter-by))]}))
+                          (str endpoint "beer_name=" (:input-value value) "&"))
+                        (if (and (= "ibu" (:field-name value)) (= "between" (:comparator value)))
+                          (if (or (= (-> value :input-value) "") (= "" (:max-input-value value)))
+                            (str endpoint)
+                            (str endpoint "ibu_gt=" (:input-value value) "&" "ibu_lt=" (:max-input-value value) "&"))
+                          (str endpoint)))))
+                  initial (-> db :query-map :filter-by)))]}))
 
 
 (re-frame/reg-event-fx
@@ -96,7 +99,8 @@
  (fn [db [_]]
    (js/console.log (:query-map db))))
 
-(re-frame/reg-event-db
+(re-frame/reg-event-fx
  ::change-page
- (fn [db [_ new_page]]
-   (assoc-in db [:query-map :page-number] new_page)))
+ (fn [{:keys [db]} [_ new_page]]
+   {:db (assoc-in db [:query-map :page-number] new_page)
+    :fx [[:dispatch [::create-query]]]}))

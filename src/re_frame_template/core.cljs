@@ -20,6 +20,6 @@
 
 (defn init []
   (re-frame/dispatch-sync [::events/initialize-db])
-  (re-frame/dispatch [::events/handler-with-http "https://api.punkapi.com/v2/beers"])
+  (re-frame/dispatch [::events/create-query])
   (dev-setup)
   (mount-root))

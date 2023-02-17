@@ -21,3 +21,8 @@
  ::page-number
  (fn [db _]
    (-> db :query-map :page-number)))
+
+(re-frame/reg-sub
+ ::page-size
+ (fn [db _]
+   (-> db :query-map :page-size)))
