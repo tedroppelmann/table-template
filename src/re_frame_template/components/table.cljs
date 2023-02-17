@@ -69,7 +69,7 @@
     (fn []
       [:div
        [Print]
-       [pagination/Pagination]
+       [pagination/Pagination {:data @data}]
        [:table.table.table-striped {:style {:table-layout "fixed" :width "100%"}}
         [Header {:columns columns-filtered :filter-options filter-options}]
         (when (not @loading?)

@@ -71,22 +71,25 @@
                                                   :type type
                                                   :comparator comparator
                                                   :max-input-value max-input-value})
-    :dispatch [::create-query]}))
+    :fx [[:dispatch [::change-page 1]]
+         [:dispatch [::create-query]]]}))
 
 (re-frame/reg-event-fx
  ::cancel-filter
  (fn [{:keys [db]} [_ key]]
    (when (-> db :query-map :filter-by key)
      {:db (update-in db [:query-map :filter-by] dissoc key)
-      :dispatch [::create-query]})))
+      :fx [[:dispatch [::change-page 1]]
+           [:dispatch [::create-query]]]})))
 
-(re-frame/reg-event-db
+(re-frame/reg-event-fx
  ::sort
- (fn [db [_ key value]]
-   (if (= value "delete")
-     (update-in db [:query-map :sort-by] dissoc key)
-     (assoc-in db [:query-map :sort-by] {key {:field-name (name key) 
-                                             :order value}}))))
+ (fn [{:keys [db]} [_ key value]]
+   {:db (if (= value "delete")
+          (update-in db [:query-map :sort-by] dissoc key)
+          (assoc-in db [:query-map :sort-by] {key {:field-name (name key)
+                                                   :order value}}))
+    :fx [[:dispatch [::change-page 1]]]}))
 
 (re-frame/reg-event-db
  ::print
