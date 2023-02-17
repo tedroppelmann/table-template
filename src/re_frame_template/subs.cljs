@@ -16,3 +16,8 @@
  ::sort-by
  (fn [db _]
    (-> db :query-map :sort-by)))
+
+(re-frame/reg-sub
+ ::page-number
+ (fn [db _]
+   (-> db :query-map :page-number)))

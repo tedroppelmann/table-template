@@ -4,7 +4,8 @@
    [re-frame-template.events :as events]
    [re-frame-template.subs :as subs]
    [re-frame-template.components.filter :as filter]
-   [re-frame-template.components.sorter :as sorter]))
+   [re-frame-template.components.sorter :as sorter]
+   [re-frame-template.components.pagination :as pagination]))
 
 
 (defn Print []
@@ -68,6 +69,7 @@
     (fn []
       [:div
        [Print]
+       [pagination/Pagination]
        [:table.table.table-striped {:style {:table-layout "fixed" :width "100%"}}
         [Header {:columns columns-filtered :filter-options filter-options}]
         (when (not @loading?)

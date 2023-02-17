@@ -92,3 +92,8 @@
  ::print
  (fn [db [_]]
    (js/console.log (:query-map db))))
+
+(re-frame/reg-event-db
+ ::change-page
+ (fn [db [_ new_page]]
+   (assoc-in db [:query-map :page-number] new_page)))
