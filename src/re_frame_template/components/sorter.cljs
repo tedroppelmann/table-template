@@ -5,11 +5,12 @@
    [re-frame-template.subs :as subs]))
 
 
-(defn SortButton [key]
-  (let [sort-by (re-frame/subscribe [::subs/sort-by])]
+(defn SortButton [{:keys [column]}]
+  (let [sort-by (re-frame/subscribe [::subs/sort-by])
+        accessor (:accessor column)]
     (fn []
-      (let [val (if (-> @sort-by key)
-                  (if (= (-> @sort-by key :order) "asc")
+      (let [val (if (-> @sort-by accessor)
+                  (if (= (-> @sort-by accessor :order) "asc")
                     "asc"
                     "desc")
                   "")
@@ -20,5 +21,5 @@
         [:button.btn.w-100
          {:type "button"
           :on-click (fn []
-                      (re-frame/dispatch [::events/sort key next-click-val]))}
+                      (re-frame/dispatch [::events/sort (:accessor column) next-click-val]))}
          (str "Sort " val)]))))

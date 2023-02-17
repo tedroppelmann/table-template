@@ -50,7 +50,7 @@
           (fn [column]
             [:th 
              (when (not (:not-sorted? column))
-               [sorter/SortButton (:accessor column)])])
+               [sorter/SortButton {:column column}])])
           columns))
    (into [:tr]
          (map
