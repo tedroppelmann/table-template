@@ -82,4 +82,5 @@
        (if @loading?
          [:h3.text-center "Loading..."]
          (when (empty? @data)
-           [:h3.text-center "No data"]))])))
+           [:h3.text-center "No data"]))
+       [pagination/Pagination {:data @data}]])))

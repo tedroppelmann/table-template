@@ -1,6 +1,7 @@
 (ns re-frame-template.views
   (:require 
-   [re-frame-template.components.table :as table]))
+   [re-frame-template.components.table :as table]
+   [react-number-format :refer (NumericFormat)]))
 
 (defn Header [{:keys [headers]}]
   (into [:div]
@@ -29,6 +30,12 @@
    {:Header (Header {:headers ["IBU"]}) 
     :accessor :ibu
     :Footer Footer
+    :Cell (fn [{:keys [row value]}]
+            [:div 
+             [:> NumericFormat {:value value
+                                :prefix "IBU "
+                                :displayType "text"
+                                :decimalSeparator ","}]])
     }
    {:Header (Header {:headers ["Tagline" "Brewers tips"]})
     :accessor :tagline
@@ -42,7 +49,7 @@
     }])
 
 (defonce filter-options
-  [{:name "Equals" :key "equals" :types ["number" "date"]}
+  [{:name "Equals" :key "equals" :types ["text" "number" "date"]}
    {:name "Contains" :key "contains" :types ["text" "number"]}
    {:name "Between" :key "between" :types ["number" "date"] :two-inputs true}
    {:name "Greater than" :key "greater-than" :types ["number" "date"]}
