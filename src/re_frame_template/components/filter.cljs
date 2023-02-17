@@ -98,11 +98,12 @@
        (when (-> @filter-state :error)
          [FilterErrorAlert {:filter-state filter-state}])
        [:div.d-flex.flex-row
-        [:div.d-flex.flex-column 
+        [:div.d-flex.flex-column.w-100
          [FilterInput {:filter-state filter-state :filter-input-type :filter-input}]
          [FilterDropdown {:filter-state filter-state}]
          (when (-> @filter-state :dropdown-selection :two-inputs)
            [:div.mt-3
             [FilterInput {:filter-state filter-state :filter-input-type :filter-input-max}]])
          [FilterConfirmation {:filter-state filter-state}]]
-        [FilterFieldSelector {:filter-state filter-state :filter-fields filter-fields :filter-options filter-options}]]])))
+        (when (< 1 (count filter-fields))
+          [FilterFieldSelector {:filter-state filter-state :filter-fields filter-fields :filter-options filter-options}])]])))

@@ -5,6 +5,11 @@
 ; Happy coding! ♥️
 
 ; Jacking in...
+; Connecting using "shadow-cljs" project type.
+; You can make Calva auto-select this:
+; "calva.autoSelectReplConnectProjectType": "shadow-cljs"
+;   - See https://calva.io/connect/#auto-select-project-type
+; 
 ; Starting Jack-in Terminal: npx shadow-cljs -d cider/cider-nrepl:0.28.5 watch :app
 ; Hooking up nREPL sessions...
 ; Connected session: clj

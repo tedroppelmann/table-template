@@ -82,9 +82,11 @@
 
 (re-frame/reg-event-db
  ::sort
- (fn [db [_ key]]
-   (assoc-in db [:query-map :sort-by key] {:field-name (name key)
-                                           :order "asc"})))
+ (fn [db [_ key value]]
+   (if (= value "delete")
+     (update-in db [:query-map :sort-by] dissoc key)
+     (assoc-in db [:query-map :sort-by] {key {:field-name (name key) 
+                                             :order value}}))))
 
 (re-frame/reg-event-db
  ::print

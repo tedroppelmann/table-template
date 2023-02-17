@@ -13,6 +13,6 @@
    (:data-loading? db)))
 
 (re-frame/reg-sub
- ::query-map
+ ::sort-by
  (fn [db _]
-   (:query-map db)))
+   (-> db :query-map :sort-by)))

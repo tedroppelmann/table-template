@@ -3,19 +3,9 @@
    [re-frame.core :as re-frame]
    [re-frame-template.events :as events]
    [re-frame-template.subs :as subs]
-   [reagent.core :as r]
-   [re-frame-template.components.filter :as filter]))
+   [re-frame-template.components.filter :as filter]
+   [re-frame-template.components.sorter :as sorter]))
 
-
-(defn SortButton [key]
-  (let [order (r/atom true)]
-    (fn []
-      [:input
-       {:type "button"
-        :value (str "Sort " @order)
-        :on-click (fn []
-                    (re-frame/dispatch [::events/sort key])
-                    (reset! order (not @order)))}])))
 
 (defn Print []
   [:input
@@ -42,11 +32,10 @@
 (defn Footer [{:keys [columns]}]
   [:tfoot
    (into [:tr] (map
-                (fn [column] 
-                  (if (:Footer column)
-                    [:td 
-                     [(:Footer column)]]
-                    [:td ]))
+                (fn [column]
+                  [:td
+                   (when (:Footer column)
+                     [(:Footer column)])])
                 columns))])
 
 (defn Header [{:keys [columns filter-options]}] 
@@ -59,10 +48,16 @@
    (into [:tr]
          (map
           (fn [column]
-            (if (:filter-fields column)
-              [:th 
-               [filter/FilterBox (:filter-fields column) filter-options]]
-              [:th]))
+            [:th 
+             (when (not (:not-sorted? column))
+               [sorter/SortButton (:accessor column)])])
+          columns))
+   (into [:tr]
+         (map
+          (fn [column]
+            [:th
+             (when (:filter-fields column)
+               [filter/FilterBox (:filter-fields column) filter-options])])
           columns))])
 
 
@@ -73,8 +68,7 @@
     (fn []
       [:div
        [Print]
-       [:table.table.table-striped.table-responsive
-        ;; [Headers {:columns columns-filtered :filter-options filter-options}] funciona sin las listas
+       [:table.table.table-striped {:style {:table-layout "fixed" :width "100%"}}
         [Header {:columns columns-filtered :filter-options filter-options}]
         (when (not @loading?)
           [:tbody

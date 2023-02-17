@@ -32,7 +32,8 @@
     }
    {:Header (Header {:headers ["Tagline" "Brewers tips"]})
     :accessor :tagline
-    ;; :filter-fields [{:label "Tagline" :accessor :tagline :type "text"}]
+    :not-sorted? true
+    :filter-fields [{:label "Tagline" :accessor :tagline :type "text"}]
     :Cell (fn [{:keys [row value]}]
             [:div
              value
