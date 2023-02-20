@@ -10,32 +10,36 @@
            [:div header])
          headers)))
 
-(defn Footer []
-  [:div "Test"])
-
 (defonce columns
   [{:Header (Header {:headers ["Id"]})
     :accessor :id
     }
-   {:Header (Header {:headers ["Name" "IBU"]})
+   {:Header (Header {:headers ["Name" "PH"]})
     :accessor :name
     :filter-fields [{:label "Name" :accessor :name :type "text"}
-                    {:label "IBU" :accessor :ibu :type "number"}]
+                    {:label "PH" :accessor :ph :type "number"}]
     :Cell (fn [{:keys [row value]}]
             [:div
              value
              [:br]
-             [:button.btn.btn-primary (:ibu row)]])
+             [:button.btn.btn-primary (:ph row)]])
     }
    {:Header (Header {:headers ["IBU"]}) 
     :accessor :ibu
-    :Footer Footer
+    :filter-fields [{:label "IBU" :accessor :ibu :type "number"}] 
     :Cell (fn [{:keys [row value]}]
             [:div 
              [:> NumericFormat {:value value
                                 :prefix "IBU "
                                 :displayType "text"
                                 :decimalSeparator ","}]])
+    :Footer (fn [{:keys [data column]}]
+              (let [numerator (reduce (fn [k v] (+ k ((:accessor column) v))) 0 data)
+                    denominator (count data)
+                    average (/ numerator denominator)]
+                (fn []
+                  [:div
+                   [:div (str "IBU Average: " average)]])))
     }
    {:Header (Header {:headers ["Tagline" "Brewers tips"]})
     :accessor :tagline

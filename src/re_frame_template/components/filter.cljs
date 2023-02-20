@@ -2,11 +2,12 @@
   (:require
    [re-frame.core :as re-frame]
    [re-frame-template.events :as events]
-   [reagent.core :as r]))
+   [reagent.core :as r]
+   [react-number-format :refer (NumericFormat)]))
 
 
 (defn FilterInput [{:keys [filter-state filter-input-type]}]
-  [:input.form-control
+  [:input.form-control 
    {:type "text"
     :placeholder (str "Filter by " (-> @filter-state :filter-field-selected :label))
     :value (filter-input-type @filter-state)

@@ -17,26 +17,19 @@
 (defn Row [{:keys [row columns]}]
   (into [:tr] (map
                (fn [column]
-                 (if (:nested? column)
-                   (into [:td] (map 
-                                (fn [element]
-                                  (if (:Cell element)
-                                    [(:Cell element) {:row row :value ((:accessor element) row)}]
-                                    [:div ((:accessor element) row)])) 
-                                (:nested? column)))
-                   [:td
-                    (if (:Cell column) 
-                      [(:Cell column) {:row row :value ((:accessor column) row)}]
-                      ((:accessor column) row))]))
+                 [:td
+                  (if (:Cell column)
+                    [(:Cell column) {:row row :value ((:accessor column) row)}]
+                    ((:accessor column) row))])
                columns)))
 
-(defn Footer [{:keys [columns]}]
+(defn Footer [{:keys [columns data]}]
   [:tfoot
    (into [:tr] (map
                 (fn [column]
                   [:td
                    (when (:Footer column)
-                     [(:Footer column)])])
+                     [(:Footer column) {:column column :data data}])])
                 columns))])
 
 (defn Header [{:keys [columns filter-options]}] 
@@ -78,7 +71,7 @@
              ^{:key (:id element)}
              [Row {:row element :columns columns-filtered}])])
         (when (and (not @loading?) (seq @data))
-          [Footer {:columns columns-filtered}])]
+          [Footer {:columns columns-filtered :data @data}])]
        (if @loading?
          [:h3.text-center "Loading..."]
          (when (empty? @data)
