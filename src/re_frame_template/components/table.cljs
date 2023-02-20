@@ -5,7 +5,8 @@
    [re-frame-template.subs :as subs]
    [re-frame-template.components.filter :as filter]
    [re-frame-template.components.sorter :as sorter]
-   [re-frame-template.components.pagination :as pagination]))
+   [re-frame-template.components.pagination :as pagination]
+   [re-com.core :refer [throbber]]))
 
 
 (defn Print []
@@ -73,7 +74,7 @@
         (when (and (not @loading?) (seq @data))
           [Footer {:columns columns-filtered :data @data}])]
        (if @loading?
-         [:h3.text-center "Loading..."]
+         [:div {:style {:flex 1}}[throbber :size :large]]
          (when (empty? @data)
            [:h3.text-center "No data"]))
        [pagination/Pagination {:data @data}]])))
