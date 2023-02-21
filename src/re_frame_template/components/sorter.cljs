@@ -12,14 +12,15 @@
     (fn []
       (let [val (if (-> @sort-by accessor)
                   (if (= (-> @sort-by accessor :order) "asc")
-                    "asc"
-                    "desc")
-                  "")
+                    ["asc" [:i {:class "zmdi zmdi-sort-amount-asc"}]]
+                    ["desc" [:i {:class "zmdi zmdi-sort-amount-desc"}]])
+                  ["" "Sort"])
             next-click-val (cond
-                             (= val "") "asc"
-                             (= val "asc") "desc"
-                             (= val "desc") "delete")]
-        [button
-         :label  (str "Sort " val)
-         :tooltip "Sort button"
-         :on-click (fn [] (re-frame/dispatch [::events/sort (:accessor column) next-click-val]))]))))
+                             (= (first val) "") "asc"
+                             (= (first val) "asc") "desc"
+                             (= (first val) "desc") "delete")]
+        [:div {:style {:display "flex" :justify-content "center" :width "100%"}}
+         [button
+          :label  (last val)
+          :tooltip "Sort button"
+          :on-click (fn [] (re-frame/dispatch [::events/sort (:accessor column) next-click-val]))]]))))

@@ -3,8 +3,15 @@
    [re-frame.core :as re-frame]
    [re-frame-template.events :as events]
    [reagent.core :as r]
-   [re-com.core :refer [v-box h-box input-text single-dropdown button datepicker-dropdown]]))
+   [re-com.core :refer [v-box h-box input-text single-dropdown button datepicker-dropdown]]
+   [cljs-time.coerce :as cljs-time]))
 
+(defonce filter-options
+  [{:name "Equals" :key "equals" :types ["text" "number" "date"]}
+   {:name "Contains" :key "contains" :types ["text" "number"]}
+   {:name "Between" :key "between" :types ["number" "date"] :two-inputs true}
+   {:name "Greater than" :key "greater-than" :types ["number" "date"]}
+   {:name "Lower than" :key "lower-than" :types ["number" "date"]}])
 
 (defn FilterInput [{:keys [filter-state filter-input-type]}]
   (if (= (-> @filter-state :filter-field-selected :type) "date")
@@ -14,12 +21,10 @@
      :width "100%"
      :start-of-week 0
      :format "dd MMM yyyy"
-     :goog? true
      :placeholder (str "Filter by " (-> @filter-state :filter-field-selected :label)) 
-     :on-change (fn [e] 
-                  (js/console.log e)
+     :on-change (fn [e]
                   (swap! filter-state assoc 
-                         filter-input-type e
+                         filter-input-type (cljs-time/to-string e)
                          :date e))]
     [input-text
      :model (filter-input-type @filter-state)
@@ -74,7 +79,7 @@
    {:role "alert"}
    (-> @filter-state :error)])
 
-(defn FilterFieldSelector [{:keys [filter-state filter-fields filter-options]}]
+(defn FilterFieldSelector [{:keys [filter-state filter-fields]}]
   [:div.btn-group.dropend.ml-2.align-self-start
    [:button.btn.dropdown-toggle
     {:type "button"
@@ -97,7 +102,7 @@
              (:label filter-field)])
           filter-fields))])
 
-(defn FilterBox [filter-fields filter-options]
+(defn FilterBox [filter-fields]
   (let [options (filter #(contains? (set (:types %)) (:type (first filter-fields))) filter-options)
         filter-state (r/atom {:filter-input ""
                               :filter-input-max ""
@@ -122,4 +127,4 @@
                                             [FilterInput {:filter-state filter-state :filter-input-type :filter-input-max}])
                                           [FilterConfirmation {:filter-state filter-state}]]]
                               (when (< 1 (count filter-fields))
-                                [FilterFieldSelector {:filter-state filter-state :filter-fields filter-fields :filter-options filter-options}])]]]])))
+                                [FilterFieldSelector {:filter-state filter-state :filter-fields filter-fields}])]]]])))

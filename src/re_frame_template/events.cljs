@@ -26,8 +26,7 @@
  (fn [db [_ result]]
    ;; (js/console.log result)
    (-> db 
-       (assoc :beers result 
-              :beers-filtered result
+       (assoc :data result
               :data-loading? false))))
 
 (re-frame/reg-event-db
@@ -97,10 +96,37 @@
 (re-frame/reg-event-db
  ::print
  (fn [db [_]]
-   (js/console.log (:query-map db))))
+   (js/console.log (:query-map db))
+   (js/console.log (:checked-map db))))
 
 (re-frame/reg-event-fx
  ::change-page
  (fn [{:keys [db]} [_ new_page]]
    {:db (assoc-in db [:query-map :page-number] new_page)
-    :fx [[:dispatch [::create-query]]]}))
+    :fx [[:dispatch [::reset-check]]
+         [:dispatch [::create-query]]]}))
+
+(re-frame/reg-event-db
+ ::change-checked-map
+ (fn [db [_ row bool key]]
+   (if bool 
+     (assoc-in db [:checked-map key] {:row row})
+     (update-in db [:checked-map] dissoc key))))
+
+(re-frame/reg-event-db
+ ::check-all
+ (fn [db [_ bool]]
+   (if bool
+     (assoc db 
+            :checked-map (into {} (map (fn [row] {(keyword (str (:id row))) {:row row}}) (:data db))) 
+            :check-all? true)
+     (assoc db 
+            :checked-map {}
+            :check-all? false))))
+
+(re-frame/reg-event-db
+ ::reset-check
+ (fn [db [_]]
+   (assoc db
+          :checked-map {}
+          :check-all? false)))

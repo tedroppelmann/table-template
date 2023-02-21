@@ -10,6 +10,7 @@
   [cljs-ajax "0.8.4"]
   [day8.re-frame/http-fx "0.2.4"]
   [re-com "2.13.2"]
+  [com.andrewmcveigh/cljs-time "0.5.2"]
 
 
   [binaryage/devtools "1.0.6"]]

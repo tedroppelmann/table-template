@@ -43,7 +43,7 @@
     }
    {:Header (Header {:headers ["Tagline" "Brewers tips"]})
     :accessor :tagline
-    :not-sorted? true
+    :sorted? false
     :filter-fields [{:label "Tagline" :accessor :tagline :type "text"}]
     :Cell (fn [{:keys [row value]}]
             [:div
@@ -52,14 +52,7 @@
              (:brewers_tips row)])
     }])
 
-(defonce filter-options
-  [{:name "Equals" :key "equals" :types ["text" "number" "date"]}
-   {:name "Contains" :key "contains" :types ["text" "number"]}
-   {:name "Between" :key "between" :types ["number" "date"] :two-inputs true}
-   {:name "Greater than" :key "greater-than" :types ["number" "date"]}
-   {:name "Lower than" :key "lower-than" :types ["number" "date"]}])
-
 (defn main-panel []
   [:div.container
    [:h1.text-center "Beers of the World"] 
-   [table/Table {:columns columns :filter-options filter-options}]])
+   [table/Table {:columns columns}]])

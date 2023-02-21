@@ -5,7 +5,7 @@
 (re-frame/reg-sub
  ::data
  (fn [db]
-   (:beers db)))
+   (:data db)))
 
 (re-frame/reg-sub
  ::data-loading?
@@ -26,3 +26,18 @@
  ::page-size
  (fn [db _]
    (-> db :query-map :page-size)))
+
+(re-frame/reg-sub
+ ::query-map
+ (fn [db _]
+   (-> db :query-map)))
+
+(re-frame/reg-sub
+ ::checked-map
+ (fn [db _]
+   (-> db :checked-map)))
+
+(re-frame/reg-sub
+ ::check-all?
+ (fn [db _]
+   (-> db :check-all?)))

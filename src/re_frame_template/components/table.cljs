@@ -6,57 +6,64 @@
    [re-frame-template.components.filter :as filter]
    [re-frame-template.components.sorter :as sorter]
    [re-frame-template.components.pagination :as pagination]
+   [re-frame-template.components.checkbox :as checkbox]
    [re-com.core :refer [throbber]]))
 
 
 (defn Print []
-  [:input
-   {:type "button"
-    :value "Print filter params"
-    :on-click #(re-frame/dispatch [::events/print])}])
+  [:div
+   [:input
+    {:type "button"
+     :value "Print filter params"
+     :on-click #(re-frame/dispatch [::events/print])}]
+   (let [query-map (re-frame/subscribe [::subs/query-map])] 
+     [:p (str @query-map)])])
 
-(defn Row [{:keys [row columns]}]
-  (into [:tr] (map
-               (fn [column]
-                 [:td
-                  (if (:Cell column)
-                    [(:Cell column) {:row row :value ((:accessor column) row)}]
-                    ((:accessor column) row))])
-               columns)))
+(defn Row [{:keys [row columns checkable?]}]
+  (into [:tr (when checkable? [:td [checkbox/CheckBox {:row row}]])] 
+        (map
+         (fn [column]
+           [:td
+            (if (:Cell column)
+              [(:Cell column) {:row row :value ((:accessor column) row)}]
+              ((:accessor column) row))])
+         columns)))
 
-(defn Footer [{:keys [columns data]}]
+(defn Footer [{:keys [columns data checkable?]}]
   [:tfoot
-   (into [:tr] (map
-                (fn [column]
-                  [:td
-                   (when (:Footer column)
-                     [(:Footer column) {:column column :data data}])])
-                columns))])
+   (into [:tr (when checkable? [:td])] 
+         (map
+          (fn [column]
+            [:td
+             (when (:Footer column)
+               [(:Footer column) {:column column :data data}])])
+          columns))])
 
-(defn Header [{:keys [columns filter-options]}] 
+(defn Header [{:keys [columns checkable?]}] 
   [:thead
-   (into [:tr]
+   (into [:tr (when checkable? [:th])] 
          (map
           (fn [column]
             [:th (:Header column)])
           columns))
-   (into [:tr]
+   (into [:tr (when checkable? [:th [checkbox/CheckAll]])]
          (map
           (fn [column]
-            [:th 
-             (when (not (:not-sorted? column))
-               [sorter/SortButton {:column column}])])
+            (let [{:keys [sorted?] :or {sorted? true}} column]
+              [:th
+               (when sorted?
+                 [sorter/SortButton {:column column}])]))
           columns))
-   (into [:tr]
+   (into [:tr (when checkable? [:th [checkbox/CheckOptions]])]
          (map
           (fn [column]
             [:th
              (when (:filter-fields column)
-               [filter/FilterBox (:filter-fields column) filter-options])])
+               [filter/FilterBox (:filter-fields column)])])
           columns))])
 
 
-(defn Table [{:keys [columns filter-options]}]
+(defn Table [{:keys [columns checkable?] :or {checkable? true}}]
   (let [data (re-frame/subscribe [::subs/data])
         columns-filtered (filter #(not (:hidden? %)) columns)
         loading? (re-frame/subscribe [::subs/data-loading?])] 
@@ -65,16 +72,19 @@
        [Print]
        [pagination/Pagination {:data @data}]
        [:table.table.table-striped {:style {:table-layout "fixed" :width "100%"}}
-        [Header {:columns columns-filtered :filter-options filter-options}]
+        [Header {:columns columns-filtered :checkable? checkable?}]
         (when (not @loading?)
-          [:tbody
-           (for [element @data]
-             ^{:key (:id element)}
-             [Row {:row element :columns columns-filtered}])])
+          (into [:tbody] 
+                (map 
+                 (fn [element] 
+                   [Row {:row element :columns columns-filtered :checkable? checkable?}]) 
+                 @data)))
         (when (and (not @loading?) (seq @data))
-          [Footer {:columns columns-filtered :data @data}])]
+          [Footer {:columns columns-filtered :data @data :checkable? checkable?}])]
        (if @loading?
-         [:div {:style {:flex 1}}[throbber :size :large]]
+         [:div 
+          {:style {:display "flex" :justify-content "center"}}
+          [throbber :size :large]]
          (when (empty? @data)
            [:h3.text-center "No data"]))
        [pagination/Pagination {:data @data}]])))
