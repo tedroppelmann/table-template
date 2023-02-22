@@ -45,37 +45,48 @@
 (re-frame/reg-event-fx
  ::create-query
  (fn [{:keys [db]} [_]]
-   {:dispatch [::handler-with-http 
+   {:dispatch [::handler-with-http
                (let [page-number (-> db :query-map :page-number)
                      page-size (-> db :query-map :page-size)
-                     initial (str "https://api.punkapi.com/v2/beers?page=" page-number "&per_page=" page-size "&")]
+                     initial-url (str "https://api.punkapi.com/v2/beers?page=" page-number "&per_page=" page-size "&")]
                  (reduce
-                  (fn [endpoint v]
-                    (let [value (last v)]
-                      (if (= "name" (:field-name value))
-                        (if (= (-> value :input-value) "")
-                          (str endpoint)
-                          (str endpoint "beer_name=" (:input-value value) "&"))
-                        (if (and (= "ibu" (:field-name value)) (= "between" (:comparator value)))
-                          (if (or (= (-> value :input-value) "") (= "" (:max-input-value value)))
-                            (str endpoint)
-                            (str endpoint "ibu_gt=" (:input-value value) "&" "ibu_lt=" (:max-input-value value) "&"))
-                          (str endpoint)))))
-                  initial (-> db :query-map :filter-by)))]}))
+                  (fn [url v]
+                    (let [value (last v)
+                          field-name (:field-name value)
+                          comparator (:comparator value)]
+                      (case field-name
+                        "name" (case comparator
+                                 "contains" (str url "beer_name=" (:input-value value) "&")
+                                 (str url)) 
+                        "ibu" (case comparator
+                                "between" (str url "ibu_gt=" (:input-value value) "&" "ibu_lt=" (:max-input-value value) "&")
+                                "greater-than" (str url "ibu_gt=" (:input-value value) "&")
+                                "lower-than" (str url "ibu_lt=" (:input-value value) "&")
+                                (str url))
+                        "abv" (case comparator
+                                "between" (str url "abv_gt=" (:input-value value) "&" "abv_lt=" (:max-input-value value) "&")
+                                "greater-than" (str url "abv_gt=" (:input-value value) "&")
+                                "lower-than" (str url "abv_lt=" (:input-value value) "&")
+                                (str url))
+                        (str url))))
+                  initial-url (-> db :query-map :filter-by)))]}))
 
 (re-frame/reg-event-fx
  ::filter
  (fn [{:keys [db]} [_ filter-state]]
-   {:db (assoc-in db [:query-map :filter-by (-> filter-state :filter-field-selected :accessor)] 
-                  {:field-name (name (-> filter-state :filter-field-selected :accessor)) 
-                   :input-value (:filter-input filter-state) 
-                   :type (-> filter-state :filter-field-selected :type) 
-                   :comparator (-> filter-state :dropdown-selection :key)
-                   :max-input-value (:filter-input-max filter-state)})
-    :fx [(when (:previous-filter-field-accessor filter-state)
-           [:dispatch [::delete-previous-filter (:previous-filter-field-accessor filter-state)]])
-         [:dispatch [::change-page 1]]
-         [:dispatch [::create-query]]]}))
+   (let [accessor (-> filter-state :filter-field-selected :accessor)
+         type (-> filter-state :filter-field-selected :type)
+         comparator (-> filter-state :dropdown-selection :key)]
+     {:db (assoc-in db [:query-map :filter-by accessor]
+                    {:field-name (name accessor)
+                     :input-value (:filter-input filter-state)
+                     :type type
+                     :comparator comparator
+                     :max-input-value (:filter-input-max filter-state)})
+      :fx [(when (:previous-filter-field-accessor filter-state)
+             [:dispatch [::delete-previous-filter (:previous-filter-field-accessor filter-state)]])
+           [:dispatch [::change-page 1]]
+           [:dispatch [::create-query]]]})))
 
 (re-frame/reg-event-db
  ::delete-previous-filter

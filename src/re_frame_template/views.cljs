@@ -14,15 +14,18 @@
   [{:Header (MyHeader {:headers ["Id"]})
     :accessor :id
     }
-   {:Header (MyHeader {:headers ["Name" "First brewed"]})
+   {:Header (MyHeader {:headers ["Name" "First brewed" "ABV"]})
     :accessor :name
     :filter-fields [{:label "Name" :accessor :name :type "text"}
-                    {:label "First brewed" :accessor :first_brewed :type "date"}]
+                    {:label "First brewed" :accessor :first_brewed :type "date"}
+                    {:label "ABV" :accessor :abv :type "number"}]
     :Cell (fn [{:keys [row value]}]
             [:div
              value
-             [:br]
-             [:button.btn.btn-primary (:first_brewed row)]])
+             [:p]
+             [:button.btn.btn-primary (:first_brewed row)]
+             [:p]
+             (:abv row)])
     }
    {:Header (MyHeader {:headers ["IBU"]}) 
     :accessor :ibu

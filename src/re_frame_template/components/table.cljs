@@ -7,7 +7,7 @@
    [re-frame-template.components.sorter :as sorter]
    [re-frame-template.components.pagination :as pagination]
    [re-frame-template.components.checkbox :as checkbox]
-   [re-com.core :refer [throbber h-box box]]))
+   [re-com.core :refer [throbber h-box box v-box]]))
 
 
 (defn Print []
@@ -47,13 +47,13 @@
             (let [{:keys [sorted?] :or {sorted? true}} column]
               [:th
                [h-box
-                :gap "10px"
+                :justify :between
                 :children [[box
                             :align-self :center
                             :child (:Header column)]
                            (when sorted?
                              [box
-                              :align-self :center
+                              :align-self :end
                               :child [sorter/SortButton {:column column}]])]]]))
           columns))
    (into [:tr (when checkable? [:th [checkbox/CheckOptions]])]
@@ -74,21 +74,23 @@
       (js/console.log "RENDER TABLE")
       [:div
        [Print]
-       [pagination/Pagination {:data @data}]
-       [:table.table.table-striped {:style {:table-layout "fixed" :width "100%"}}
-        [Header {:columns columns-filtered :checkable? checkable?}]
-        (when (not @loading?)
-          (into [:tbody]
-                (map 
-                 (fn [row] 
-                   [Row {:row row :columns columns-filtered :checkable? checkable?}]) 
-                 @data)))
-        (when (and (not @loading?) (seq @data))
-          [Footer {:columns columns-filtered :data @data :checkable? checkable?}])]
-       (if @loading?
-         [:div 
-          {:style {:display "flex" :justify-content "center"}}
-          [throbber :size :large]]
-         (when (empty? @data)
-           [:h3.text-center "No data"]))
-       [pagination/Pagination {:data @data}]])))
+       [v-box
+        :children [[box
+                    :align-self :end
+                    :child [pagination/Pagination {:data @data}]]
+                   [:table.table.table-striped {:style {:table-layout "fixed" :width "100%"}}
+                    [Header {:columns columns-filtered :checkable? checkable?}]
+                    (when (not @loading?)
+                      (into [:tbody]
+                            (map
+                             (fn [row]
+                               [Row {:row row :columns columns-filtered :checkable? checkable?}])
+                             @data)))
+                    (when (and (not @loading?) (seq @data))
+                      [Footer {:columns columns-filtered :data @data :checkable? checkable?}])]
+                   (if @loading?
+                     [:div
+                      {:style {:display "flex" :justify-content "center"}}
+                      [throbber :size :large]]
+                     (when (empty? @data)
+                       [:h3.text-center "No data"]))]]])))

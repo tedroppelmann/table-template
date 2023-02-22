@@ -55,7 +55,8 @@
                            (re-frame/dispatch [::events/cancel-filter (-> @filter-state :filter-field-selected :accessor)])
                            (swap! filter-state assoc
                                   :filter-input ""
-                                  :filter-input-max ""))] 
+                                  :filter-input-max ""
+                                  :date {}))] 
               [button
                :label "Filter"
                :class "btn-primary"

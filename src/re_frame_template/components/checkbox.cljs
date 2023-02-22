@@ -18,7 +18,6 @@
   (let [check-all? (re-frame/subscribe [::subs/check-all?])]
     (fn []
       [checkbox
-       :label (if @check-all? "Deselect all" "Select all")
        :model @check-all?
        :on-change (fn [e]
                     (re-frame/dispatch [::events/check-all e]))])))
