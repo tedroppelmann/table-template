@@ -13,25 +13,25 @@
    {:name "Greater than" :key "greater-than" :types ["number" "date"]}
    {:name "Lower than" :key "lower-than" :types ["number" "date"]}])
 
-(defn FilterInput [{:keys [filter-state filter-input-type]}]
-  (if (= (-> @filter-state :filter-field-selected :type) "date")
-    [datepicker-dropdown
-     :model (:date @filter-state) 
-     :show-today? true
-     :width "100%"
-     :start-of-week 0
-     :format "dd MMM yyyy"
-     :placeholder (str "Filter by " (-> @filter-state :filter-field-selected :label)) 
-     :on-change (fn [e]
-                  (swap! filter-state assoc 
-                         filter-input-type (cljs-time/to-string e)
-                         :date e))]
-    [input-text
-     :model (filter-input-type @filter-state)
-     :width "100%"
-     :placeholder (str "Filter by " (-> @filter-state :filter-field-selected :label))
-     :change-on-blur? false
-     :on-change (fn [e] (swap! filter-state assoc filter-input-type e))]))
+(defn FilterInput [{:keys [filter-state filter-input-type-key]}]
+  (let [field-type (-> @filter-state :filter-field-selected :type)]
+    (case field-type
+      "date" [datepicker-dropdown
+              :model (-> @filter-state :date filter-input-type-key)
+              :show-today? true
+              :width "100%"
+              :start-of-week 0
+              :format "dd MMM yyyy"
+              :placeholder (str "Filter by " (-> @filter-state :filter-field-selected :label))
+              :on-change (fn [e]
+                           (swap! filter-state assoc filter-input-type-key (cljs-time/to-string e))
+                           (swap! filter-state assoc-in [:date filter-input-type-key] e))]
+      [input-text
+       :model (filter-input-type-key @filter-state)
+       :width "100%"
+       :placeholder (str "Filter by " (-> @filter-state :filter-field-selected :label))
+       :change-on-blur? false
+       :on-change (fn [e] (swap! filter-state assoc filter-input-type-key e))])))
 
 (defn FilterDropdown [{:keys [filter-state]}]
   [single-dropdown
@@ -85,10 +85,12 @@
                             ;; (re-frame/dispatch [::events/cancel-filter (-> @filter-state :filter-field-selected :accessor)])
                             (swap! filter-state assoc 
                                    :filter-input ""
+                                   :filter-input-max "" 
                                    :filter-field-selected filter-field
                                    :filter-options options
                                    :dropdown-selection (first options)
-                                   :previous-filter-field-accessor previous-filter-field-key)))}
+                                   :previous-filter-field-accessor previous-filter-field-key
+                                   :date {})))}
              (:label filter-field)])
           filter-fields))])
 
@@ -100,7 +102,7 @@
                               :filter-options options
                               :dropdown-selection (first options)
                               :dropdown-selection-id (:key (first options)) 
-                              :date nil
+                              :date {}
                               :previous-filter-field-accessor false})]
     (fn [] 
       [v-box
@@ -109,10 +111,10 @@
                    :children [[v-box
                                :gap "10px"
                                :style {:flex 1}
-                               :children [[FilterInput {:filter-state filter-state :filter-input-type :filter-input}]
+                               :children [[FilterInput {:filter-state filter-state :filter-input-type-key :filter-input}]
                                           [FilterDropdown {:filter-state filter-state}]
                                           (when (-> @filter-state :dropdown-selection :two-inputs)
-                                            [FilterInput {:filter-state filter-state :filter-input-type :filter-input-max}])
+                                            [FilterInput {:filter-state filter-state :filter-input-type-key :filter-input-max}])
                                           [FilterConfirmation {:filter-state filter-state}]]]
                               (when (< 1 (count filter-fields))
                                 [FilterFieldSelector {:filter-state filter-state :filter-fields filter-fields}])]]]])))
