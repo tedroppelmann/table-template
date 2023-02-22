@@ -3,7 +3,7 @@
    [re-frame-template.components.table :as table]
    [react-number-format :refer (NumericFormat)]))
 
-(defn Header [{:keys [headers]}]
+(defn MyHeader [{:keys [headers]}]
   (into [:div]
         (map
          (fn [header]
@@ -11,10 +11,10 @@
          headers)))
 
 (defonce columns
-  [{:Header (Header {:headers ["Id"]})
+  [{:Header (MyHeader {:headers ["Id"]})
     :accessor :id
     }
-   {:Header (Header {:headers ["Name" "First brewed"]})
+   {:Header (MyHeader {:headers ["Name" "First brewed"]})
     :accessor :name
     :filter-fields [{:label "Name" :accessor :name :type "text"}
                     {:label "First brewed" :accessor :first_brewed :type "date"}]
@@ -24,7 +24,7 @@
              [:br]
              [:button.btn.btn-primary (:first_brewed row)]])
     }
-   {:Header (Header {:headers ["IBU"]}) 
+   {:Header (MyHeader {:headers ["IBU"]}) 
     :accessor :ibu
     :filter-fields [{:label "IBU" :accessor :ibu :type "number"}] 
     :Cell (fn [{:keys [row value]}]
@@ -41,7 +41,7 @@
                   [:div
                    [:div (str "IBU Average: " average)]])))
     }
-   {:Header (Header {:headers ["Tagline" "Brewers tips"]})
+   {:Header (MyHeader {:headers ["Tagline" "Brewers tips"]})
     :accessor :tagline
     :sorted? false
     :filter-fields [{:label "Tagline" :accessor :tagline :type "text"}]

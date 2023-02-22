@@ -7,7 +7,7 @@
    [re-frame-template.components.sorter :as sorter]
    [re-frame-template.components.pagination :as pagination]
    [re-frame-template.components.checkbox :as checkbox]
-   [re-com.core :refer [throbber]]))
+   [re-com.core :refer [throbber h-box box]]))
 
 
 (defn Print []
@@ -41,18 +41,20 @@
 
 (defn Header [{:keys [columns checkable?]}] 
   [:thead
-   (into [:tr (when checkable? [:th])] 
-         (map
-          (fn [column]
-            [:th (:Header column)])
-          columns))
-   (into [:tr (when checkable? [:th [checkbox/CheckAll]])]
+   (into [:tr (when checkable? [:th [checkbox/CheckAll]])] 
          (map
           (fn [column]
             (let [{:keys [sorted?] :or {sorted? true}} column]
               [:th
-               (when sorted?
-                 [sorter/SortButton {:column column}])]))
+               [h-box
+                :gap "10px"
+                :children [[box
+                            :align-self :center
+                            :child (:Header column)]
+                           (when sorted?
+                             [box
+                              :align-self :center
+                              :child [sorter/SortButton {:column column}]])]]]))
           columns))
    (into [:tr (when checkable? [:th [checkbox/CheckOptions]])]
          (map

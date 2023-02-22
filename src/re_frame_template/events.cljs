@@ -37,11 +37,10 @@
 (re-frame/reg-event-db
  ::sort-column-by
  (fn [db [_ key order]]
-   (if order 
-     (-> db
-       (assoc :beers-filtered (sort-by key (:beers-filtered db))))
-     (-> db
-         (assoc :beers-filtered (reverse (sort-by key (:beers-filtered db))))))))
+   (js/console.log key)
+   (if (= order "asc") 
+     (assoc db :data (sort-by key (:data db)))
+     (assoc db :data (reverse (sort-by key (:data db)))))))
 
 (re-frame/reg-event-fx
  ::create-query
@@ -88,10 +87,13 @@
  ::sort
  (fn [{:keys [db]} [_ key value]]
    {:db (if (= value "delete")
-          (update-in db [:query-map :sort-by] dissoc key)
+          ;; (update-in db [:query-map :sort-by] dissoc key)
+          (assoc-in db [:query-map :sort-by] (:default-sort-order db))
           (assoc-in db [:query-map :sort-by] {key {:field-name (name key)
                                                    :order value}}))
-    :fx [[:dispatch [::change-page 1]]]}))
+    :fx [[:dispatch [::change-page 1]]
+         ;; [:dispatch [::sort-column-by key value]]
+         ]}))
 
 (re-frame/reg-event-db
  ::print

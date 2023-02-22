@@ -10,17 +10,12 @@
   (let [sort-by (re-frame/subscribe [::subs/sort-by])
         accessor (:accessor column)]
     (fn []
-      (let [val (if (-> @sort-by accessor)
-                  (if (= (-> @sort-by accessor :order) "asc")
-                    ["asc" [:i {:class "zmdi zmdi-sort-amount-asc"}]]
-                    ["desc" [:i {:class "zmdi zmdi-sort-amount-desc"}]])
-                  ["" "Sort"])
-            next-click-val (cond
-                             (= (first val) "") "asc"
-                             (= (first val) "asc") "desc"
-                             (= (first val) "desc") "delete")]
-        [:div {:style {:display "flex" :justify-content "center" :width "100%"}}
-         [button
-          :label  (last val)
-          :tooltip "Sort button"
-          :on-click (fn [] (re-frame/dispatch [::events/sort (:accessor column) next-click-val]))]]))))
+      (let [value-map (if (accessor @sort-by)
+                  (cond
+                    (= (-> @sort-by accessor :order) "asc") {:label [:i {:class "zmdi zmdi-sort-amount-asc"}] :next-click "desc"}
+                    (= (-> @sort-by accessor :order) "desc") {:label [:i {:class "zmdi zmdi-sort-amount-desc"}] :next-click "delete"})
+                  {:label "Sort" :next-click "asc"})]
+        [button
+         :label  (:label value-map)
+         :tooltip "Sort button"
+         :on-click (fn [] (re-frame/dispatch [::events/sort accessor (:next-click value-map)]))]))))
