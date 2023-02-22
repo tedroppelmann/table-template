@@ -68,18 +68,20 @@
 (defn Table [{:keys [columns checkable?] :or {checkable? true}}]
   (let [data (re-frame/subscribe [::subs/data])
         columns-filtered (filter #(not (:hidden? %)) columns)
-        loading? (re-frame/subscribe [::subs/data-loading?])] 
+        loading? (re-frame/subscribe [::subs/data-loading?])
+        ] 
     (fn []
+      (js/console.log "RENDER TABLE")
       [:div
        [Print]
        [pagination/Pagination {:data @data}]
        [:table.table.table-striped {:style {:table-layout "fixed" :width "100%"}}
         [Header {:columns columns-filtered :checkable? checkable?}]
         (when (not @loading?)
-          (into [:tbody] 
+          (into [:tbody]
                 (map 
-                 (fn [element] 
-                   [Row {:row element :columns columns-filtered :checkable? checkable?}]) 
+                 (fn [row] 
+                   [Row {:row row :columns columns-filtered :checkable? checkable?}]) 
                  @data)))
         (when (and (not @loading?) (seq @data))
           [Footer {:columns columns-filtered :data @data :checkable? checkable?}])]

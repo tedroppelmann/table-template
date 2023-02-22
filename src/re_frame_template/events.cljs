@@ -63,17 +63,24 @@
                           (str endpoint)))))
                   initial (-> db :query-map :filter-by)))]}))
 
-
 (re-frame/reg-event-fx
  ::filter
- (fn [{:keys [db]} [_ key type input comparator max-input-value]]
-   {:db (assoc-in db [:query-map :filter-by key] {:field-name (name key)
-                                                  :input-value input
-                                                  :type type
-                                                  :comparator comparator
-                                                  :max-input-value max-input-value})
-    :fx [[:dispatch [::change-page 1]]
+ (fn [{:keys [db]} [_ filter-state]]
+   {:db (assoc-in db [:query-map :filter-by (-> filter-state :filter-field-selected :accessor)] 
+                  {:field-name (name (-> filter-state :filter-field-selected :accessor)) 
+                   :input-value (:filter-input filter-state) 
+                   :type (-> filter-state :filter-field-selected :type) 
+                   :comparator (-> filter-state :dropdown-selection :key)
+                   :max-input-value (:filter-input-max filter-state)})
+    :fx [(when (:previous-filter-field-accessor filter-state)
+           [:dispatch [::delete-previous-filter (:previous-filter-field-accessor filter-state)]])
+         [:dispatch [::change-page 1]]
          [:dispatch [::create-query]]]}))
+
+(re-frame/reg-event-db
+ ::delete-previous-filter
+ (fn [db [_ accessor]]
+    (update-in db [:query-map :filter-by] dissoc accessor)))
 
 (re-frame/reg-event-fx
  ::cancel-filter
@@ -92,7 +99,8 @@
             (update-in db [:query-map :sort-by] dissoc key))
           (assoc-in db [:query-map :sort-by key] {:field-name (name key)
                                                   :order value}))
-    :fx [[:dispatch [::change-page 1]]
+    :fx [(when-not (= (-> db :query-map :page-number) 1) 
+           [:dispatch [::change-page 1]])
          ;; [:dispatch [::sort-column-by key value]]
          ]}))
 

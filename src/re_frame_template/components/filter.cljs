@@ -55,29 +55,17 @@
                            (re-frame/dispatch [::events/cancel-filter (-> @filter-state :filter-field-selected :accessor)])
                            (swap! filter-state assoc
                                   :filter-input ""
-                                  :filter-input-max ""
-                                  :error false))] 
+                                  :filter-input-max ""))] 
               [button
                :label "Filter"
                :class "btn-primary"
+               :disabled? (if (or (= (-> @filter-state :filter-input) "") 
+                                  (and (-> @filter-state :dropdown-selection :two-inputs) 
+                                       (= (-> @filter-state :filter-input-max) "")))
+                           true
+                           false)
                :on-click (fn []
-                           (if (or (= (-> @filter-state :filter-input) "")
-                                   (and (-> @filter-state :dropdown-selection :two-inputs)
-                                        (= (-> @filter-state :filter-input-max) "")))
-                             (swap! filter-state assoc :error "Empty input")
-                             (do
-                               (re-frame/dispatch [::events/filter
-                                                   (-> @filter-state :filter-field-selected :accessor)
-                                                   (-> @filter-state :filter-field-selected :type)
-                                                   (-> @filter-state :filter-input)
-                                                   (-> @filter-state :dropdown-selection :key)
-                                                   (-> @filter-state :filter-input-max)])
-                               (swap! filter-state assoc :error false))))]]])
-
-(defn FilterErrorAlert [{:keys [filter-state]}]
-  [:div.alert.alert-danger
-   {:role "alert"}
-   (-> @filter-state :error)])
+                           (re-frame/dispatch [::events/filter @filter-state]))]]])
 
 (defn FilterFieldSelector [{:keys [filter-state filter-fields]}]
   [:div.btn-group.dropend.ml-2.align-self-start
@@ -92,13 +80,15 @@
             [:li>a.dropdown-item
              {:type "button"
               :on-click (fn []
-                          (let [options (filter #(contains? (set (:types %)) (:type filter-field)) filter-options)]
-                            (re-frame/dispatch [::events/cancel-filter (-> @filter-state :filter-field-selected :accessor)])
+                          (let [options (filter #(contains? (set (:types %)) (:type filter-field)) filter-options)
+                                previous-filter-field-key (-> @filter-state :filter-field-selected :accessor)]
+                            ;; (re-frame/dispatch [::events/cancel-filter (-> @filter-state :filter-field-selected :accessor)])
                             (swap! filter-state assoc 
                                    :filter-input ""
                                    :filter-field-selected filter-field
                                    :filter-options options
-                                   :dropdown-selection (first options))))}
+                                   :dropdown-selection (first options)
+                                   :previous-filter-field-accessor previous-filter-field-key)))}
              (:label filter-field)])
           filter-fields))])
 
@@ -106,17 +96,15 @@
   (let [options (filter #(contains? (set (:types %)) (:type (first filter-fields))) filter-options)
         filter-state (r/atom {:filter-input ""
                               :filter-input-max ""
-                              :error false
                               :filter-field-selected (first filter-fields)
                               :filter-options options
                               :dropdown-selection (first options)
-                              :dropdown-selection-id (:key (first options))
-                              :date nil})]
+                              :dropdown-selection-id (:key (first options)) 
+                              :date nil
+                              :previous-filter-field-accessor false})]
     (fn [] 
       [v-box
-       :children [(when (-> @filter-state :error)
-                    [FilterErrorAlert {:filter-state filter-state}])
-                  [h-box
+       :children [[h-box
                    :style {:width "100%"}
                    :children [[v-box
                                :gap "10px"
