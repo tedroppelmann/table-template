@@ -12,10 +12,11 @@
     (fn []
       (let [value-map (if (accessor @sort-by)
                   (cond
-                    (= (-> @sort-by accessor :order) "asc") {:label [:i {:class "zmdi zmdi-sort-amount-asc"}] :next-click "desc"}
-                    (= (-> @sort-by accessor :order) "desc") {:label [:i {:class "zmdi zmdi-sort-amount-desc"}] :next-click "delete"})
-                  {:label "Sort" :next-click "asc"})]
+                    (= (-> @sort-by accessor :order) "asc") {:label [:i {:class "zmdi zmdi-sort-amount-asc"}] :next-click "desc" :class "btn-primary"}
+                    (= (-> @sort-by accessor :order) "desc") {:label [:i {:class "zmdi zmdi-sort-amount-desc"}] :next-click "delete" :class "btn-primary"})
+                  {:label [:i {:class "zmdi zmdi-sort-amount-asc"}] :next-click "asc"})]
         [button
          :label  (:label value-map)
+         :class (:class value-map)
          :tooltip "Sort button"
          :on-click (fn [] (re-frame/dispatch [::events/sort accessor (:next-click value-map)]))]))))
