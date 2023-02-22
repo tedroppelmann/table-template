@@ -55,4 +55,6 @@
 (defn main-panel []
   [:div.container
    [:h1.text-center "Beers of the World"] 
-   [table/Table {:columns columns}]])
+   [table/Table {:columns columns
+                 ;; :checkable? false
+                 }]])

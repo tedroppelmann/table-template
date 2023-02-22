@@ -87,10 +87,11 @@
  ::sort
  (fn [{:keys [db]} [_ key value]]
    {:db (if (= value "delete")
-          ;; (update-in db [:query-map :sort-by] dissoc key)
-          (assoc-in db [:query-map :sort-by] (:default-sort-order db))
-          (assoc-in db [:query-map :sort-by] {key {:field-name (name key)
-                                                   :order value}}))
+          (if (= (count (-> db :query-map :sort-by)) 1)
+            (assoc-in db [:query-map :sort-by] (:default-sort-order db))
+            (update-in db [:query-map :sort-by] dissoc key))
+          (assoc-in db [:query-map :sort-by key] {:field-name (name key)
+                                                  :order value}))
     :fx [[:dispatch [::change-page 1]]
          ;; [:dispatch [::sort-column-by key value]]
          ]}))
