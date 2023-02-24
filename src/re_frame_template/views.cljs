@@ -1,7 +1,9 @@
 (ns re-frame-template.views
   (:require 
    [re-frame-template.components.table :as table]
-   [react-number-format :refer (NumericFormat)]))
+   [react-number-format :refer (NumericFormat)]
+   [re-frame.core :as re-frame]
+   [re-frame-template.subs :as subs]))
 
 (defn MyHeader [{:keys [headers]}]
   (into [:div]
@@ -58,6 +60,12 @@
 (defn main-panel []
   [:div.container
    [:h1.text-center "Beers of the World"] 
-   [table/Table {:columns columns
+   [table/Table {:data (re-frame/subscribe [::subs/data])
+                 :columns columns
                  ;; :checkable? false
+                 :SubComponent (fn [{:keys [row]}]
+                                 (js/console.log "RENDER SUBCOMPONENT") 
+                                 [:div 
+                                  {:style {:display "flex" :justify-content "center"}}
+                                  (str "Subcomponent of " (:name row))])
                  }]])

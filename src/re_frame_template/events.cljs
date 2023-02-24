@@ -16,15 +16,15 @@
    {:db   (assoc db :data-loading? true)   
     :http-xhrio {:method          :get
                  :uri             url
-                 :timeout         8000                                           
-                 :response-format (ajax/json-response-format {:keywords? true})  
+                 :timeout         8000
+                 :response-format (ajax/json-response-format {:keywords? true})
                  :on-success      [::success-http-result]
                  :on-failure      [::failure-http-result]}}))
 
 (re-frame/reg-event-db
  ::success-http-result
  (fn [db [_ result]]
-   ;; (js/console.log result)
+   (js/console.log result)
    (-> db 
        (assoc :data result
               :data-loading? false))))
@@ -32,6 +32,7 @@
 (re-frame/reg-event-db
  ::failure-http-result
  (fn [db [_ result]]
+   (js/console.log result)
    (assoc db :failure-http-result result)))
 
 (re-frame/reg-event-db
@@ -43,12 +44,18 @@
      (assoc db :data (reverse (sort-by key (:data db)))))))
 
 (re-frame/reg-event-fx
+ ::create-query2
+ (fn [{:keys [db]} [_]]
+   {:dispatch [::handler-with-http "http://localhost:8080/"]}))
+
+(re-frame/reg-event-fx
  ::create-query
  (fn [{:keys [db]} [_]]
    {:dispatch [::handler-with-http
                (let [page-number (-> db :query-map :page-number)
                      page-size (-> db :query-map :page-size)
                      initial-url (str "https://api.punkapi.com/v2/beers?page=" page-number "&per_page=" page-size "&")]
+                 
                  (reduce
                   (fn [url v]
                     (let [value (last v)
@@ -124,6 +131,7 @@
 (re-frame/reg-event-fx
  ::change-page
  (fn [{:keys [db]} [_ new_page]]
+   (js/console.log "Changing page...")
    {:db (assoc-in db [:query-map :page-number] new_page)
     :fx [[:dispatch [::reset-check]]
          [:dispatch [::create-query]]]}))
