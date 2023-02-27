@@ -86,6 +86,7 @@
         colspan (+ (count columns) (if checkable? 2 1))] 
     (fn []
       (js/console.log "RENDER TABLE")
+      (js/console.log (random-uuid))
       [:div
        [Print]
        [v-box

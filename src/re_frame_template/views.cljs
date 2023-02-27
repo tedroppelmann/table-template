@@ -12,22 +12,52 @@
            [:div header])
          headers)))
 
+(defonce columns2
+  [{:Header (MyHeader {:headers ["Seller" "Rating" "IVA"]})
+    :accessor :seller_name
+    :Cell (fn [{:keys [row value]}]
+            [:div
+             value
+             [:br]
+             (:seller_rating row)
+             [:br]
+             (:seller_iva row)])
+    }
+   {:Header (MyHeader {:headers ["Debitore" "Rating" "IVA"]})
+    :accessor :debtor_name
+    :Cell (fn [{:keys [row value]}]
+            [:div
+             value
+             [:br]
+             (:debtor_rating row)
+             [:br]
+             (:debtor_iva row)])
+    }
+   {:Header (MyHeader {:headers ["Email referente" "Nome referente" "Telefono referente"]})
+    :accessor :email_referente
+    :Cell (fn [{:keys [row value]}]
+            [:div
+             value
+             [:br]
+             (:nome_referente row)
+             [:br]
+             (:telefono_referente row)])
+    }
+   ])
+
 (defonce columns
   [{:Header (MyHeader {:headers ["Id"]})
     :accessor :id
     }
-   {:Header (MyHeader {:headers ["Name" "First brewed" "ABV"]})
+   {:Header (MyHeader {:headers ["Name" "First brewed"]})
     :accessor :name
     :filter-fields [{:label "Name" :accessor :name :type "text"}
-                    {:label "First brewed" :accessor :first_brewed :type "date"}
-                    {:label "ABV" :accessor :abv :type "number"}]
+                    {:label "First brewed" :accessor :first_brewed :type "date"}]
     :Cell (fn [{:keys [row value]}]
             [:div
              value
              [:p]
-             [:button.btn.btn-primary (:first_brewed row)]
-             [:p]
-             (:abv row)])
+             [:button.btn.btn-primary (:first_brewed row)]])
     }
    {:Header (MyHeader {:headers ["IBU"]}) 
     :accessor :ibu
@@ -63,9 +93,25 @@
    [table/Table {:data (re-frame/subscribe [::subs/data])
                  :columns columns
                  ;; :checkable? false
-                 :SubComponent (fn [{:keys [row]}]
-                                 (js/console.log "RENDER SUBCOMPONENT") 
-                                 [:div 
-                                  {:style {:display "flex" :justify-content "center"}}
-                                  (str "Subcomponent of " (:name row))])
+                 :SubComponent (fn [{:keys [row]}] 
+                                 [:table.table.table-striped.table-sm 
+                                  {:style {:table-layout "fixed" :width "100%" :text-align "center"}}
+                                  [:thead
+                                   [:tr
+                                    [:th "ABV"]
+                                    [:th "Target FG"]
+                                    [:th "Target OG"]
+                                    [:th "EBC"]
+                                    [:th "SRM"]
+                                    [:th "pH"]
+                                    [:th "Attenuation level"]]]
+                                  [:tbody
+                                   [:tr
+                                    [:td (:abv row)]
+                                    [:td (:target_fg row)]
+                                    [:td (:target_og row)]
+                                    [:td (:ebc row)]
+                                    [:td (:srm row)]
+                                    [:td (:ph row)]
+                                    [:td (:attenuation_level row)]]]])
                  }]])
