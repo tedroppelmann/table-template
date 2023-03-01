@@ -52,7 +52,8 @@
                :label "Cancel"
                :class "btn-danger"
                :on-click (fn []
-                           (re-frame/dispatch [::events/cancel-filter (-> @filter-state :filter-field-selected :accessor) table-key])
+                           (re-frame/dispatch [::events/cancel-filter {:key (-> @filter-state :filter-field-selected :accessor) 
+                                                                       :table-key table-key}])
                            (swap! filter-state assoc
                                   :filter-input ""
                                   :filter-input-max ""
@@ -65,7 +66,8 @@
                                        (= (-> @filter-state :filter-input-max) "")))
                            true
                            false)
-               :on-click (fn [] (re-frame/dispatch [::events/filter @filter-state table-key]))]]])
+               :on-click (fn [] (re-frame/dispatch [::events/filter {:filter-state @filter-state 
+                                                                     :table-key table-key}]))]]])
 
 (defn FilterFieldSelector [{:keys [filter-state filter-fields]}]
   [:div.btn-group.dropend.ml-2.align-self-start

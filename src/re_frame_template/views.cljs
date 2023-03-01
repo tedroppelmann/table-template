@@ -1,7 +1,9 @@
 (ns re-frame-template.views
   (:require 
    [re-frame-template.components.table :as table]
-   [react-number-format :refer (NumericFormat)]))
+   [react-number-format :refer (NumericFormat)]
+   [re-frame.core :as re-frame]
+   [re-frame-template.events :as events]))
 
 (defn MyHeader [{:keys [headers]}]
   (into [:div]
@@ -91,22 +93,29 @@
    [table/Table {:data-key :beers
                   :columns columns
                   :SubComponent (fn [{:keys [row-key]}]
-                                  [:<>
-                                   [table/Table {:data-key row-key
-                                                  :checkable? false
-                                                  :pagination? false
-                                                  :columns [{:Header (MyHeader {:headers ["ABV"]})
-                                                             :accessor :abv
-                                                             :sorted? false}
-                                                            {:Header (MyHeader {:headers ["Target FG"]})
-                                                             :accessor :target_fg
-                                                             :sorted? false}
-                                                            {:Header (MyHeader {:headers ["EBC"]})
-                                                             :accessor :ebc
-                                                             :sorted? false}
-                                                            {:Header (MyHeader {:headers ["SRM"]})
-                                                             :accessor :srm
-                                                             :sorted? false}
-                                                            {:Header (MyHeader {:headers ["pH"]})
-                                                             :accessor :ph
-                                                             :sorted? false}]}]])}]])
+                                  (let [data-key (keyword (str (random-uuid)))]
+                                    (fn []
+                                      (re-frame/dispatch [::events/create-query-my-server {:data-key data-key}])
+                                      [:<>
+                                       [table/Table {:data-key data-key
+                                                     :checkable? false
+                                                     :pagination? false
+                                                     :columns columns2}]
+                                       [table/Table {:data-key row-key
+                                                     :checkable? false
+                                                     :pagination? false
+                                                     :columns [{:Header (MyHeader {:headers ["ABV"]})
+                                                                :accessor :abv
+                                                                :sorted? false}
+                                                               {:Header (MyHeader {:headers ["Target FG"]})
+                                                                :accessor :target_fg
+                                                                :sorted? false}
+                                                               {:Header (MyHeader {:headers ["EBC"]})
+                                                                :accessor :ebc
+                                                                :sorted? false}
+                                                               {:Header (MyHeader {:headers ["SRM"]})
+                                                                :accessor :srm
+                                                                :sorted? false}
+                                                               {:Header (MyHeader {:headers ["pH"]})
+                                                                :accessor :ph
+                                                                :sorted? false}]}]])))}]])

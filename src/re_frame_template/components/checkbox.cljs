@@ -11,14 +11,18 @@
     (fn [] 
       [checkbox 
        :model (key @checked-map) 
-       :on-change (fn [e] (re-frame/dispatch [::events/change-checked-map row e key table-key]))])))
+       :on-change (fn [e] (re-frame/dispatch [::events/change-checked-map {:row row 
+                                                                           :bool e 
+                                                                           :key key 
+                                                                           :table-key table-key}]))])))
 
 (defn CheckAll [{:keys [table-key]}]
   (let [check-all? (re-frame/subscribe [::subs/check-all? table-key])]
     (fn []
       [checkbox
        :model @check-all?
-       :on-change (fn [e] (re-frame/dispatch [::events/check-all e table-key]))])))
+       :on-change (fn [e] (re-frame/dispatch [::events/check-all {:bool e 
+                                                                  :table-key table-key}]))])))
 
 (defn CheckOptions [{:keys [table-key]}]
   (let [checked-map (re-frame/subscribe [::subs/checked-map table-key])]

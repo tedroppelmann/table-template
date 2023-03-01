@@ -12,9 +12,10 @@
    :class "btn-link"
    :on-click (fn [] 
                (when (:is-expanded? @row-state)
-                 (re-frame/dispatch [::events/delete-row-subcomponent row-key]))
+                 (re-frame/dispatch [::events/delete-row-subcomponent {:row-key row-key}]))
                (swap! row-state assoc :is-expanded? (not (:is-expanded? @row-state))))])
 
 (defn ExtendedComponent [{:keys [row-key row SubComponent]}]
-  (re-frame/dispatch [::events/add-row-subcomponent row-key row])
+  (re-frame/dispatch [::events/add-row-subcomponent {:row-key row-key 
+                                                     :row row}])
   [SubComponent {:row-key row-key}])

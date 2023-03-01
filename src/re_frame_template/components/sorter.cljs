@@ -19,4 +19,6 @@
          :label  (:label value-map)
          :class (:class value-map)
          :tooltip "Sort button"
-         :on-click (fn [] (re-frame/dispatch [::events/sort accessor (:next-click value-map) table-key]))]))))
+         :on-click (fn [] (re-frame/dispatch [::events/sort {:key accessor 
+                                                             :value (:next-click value-map) 
+                                                             :table-key table-key}]))]))))

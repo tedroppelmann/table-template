@@ -12,11 +12,13 @@
       [:ul.pagination
        [:li.page-item {:class (when (= @page-number 1) "disabled")}
         [:a.page-link
-         {:on-click (fn [] (re-frame/dispatch [::events/change-page (dec @page-number) table-key]))}
+         {:on-click (fn [] (re-frame/dispatch [::events/change-page {:new-page (dec @page-number) 
+                                                                     :table-key table-key}]))}
          [:i {:class "zmdi zmdi-arrow-left"}]]]
        [:li.page-item.disabled
         [:a.page-link @page-number]]
        [:li.page-item {:class (when (< (count @data) @page-size) "disabled")}
         [:a.page-link
-         {:on-click (fn [] (re-frame/dispatch [::events/change-page (inc @page-number) table-key]))}
+         {:on-click (fn [] (re-frame/dispatch [::events/change-page {:new-page(inc @page-number) 
+                                                                     :table-key table-key}]))}
          [:i {:class "zmdi zmdi-arrow-right"}]]]])))

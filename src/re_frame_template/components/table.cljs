@@ -107,7 +107,7 @@
         columns-filtered (filter #(not (:hidden? %)) columns)]
     (fn []
       (js/console.log (str "RENDER TABLE " table-key))
-      (re-frame/dispatch [::events/create-new-table table-key])
+      (re-frame/dispatch [::events/create-new-table {:table-key table-key}])
       [:div
        [v-box
         :children [(when pagination?
