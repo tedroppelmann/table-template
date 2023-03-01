@@ -5,25 +5,23 @@
    [re-frame-template.subs :as subs]
    [re-com.core :refer [checkbox h-box button]]))
 
-(defn CheckBox [{:keys [row]}] ;; I need to know the key of the row, maybe not always is id
+(defn CheckBox [{:keys [row table-key]}] ;; I need to know the key of the row, maybe not always is id
   (let [key (keyword (str (:id row)))
-        checked-map (re-frame/subscribe [::subs/checked-map])] 
+        checked-map (re-frame/subscribe [::subs/checked-map table-key])] 
     (fn [] 
       [checkbox 
        :model (key @checked-map) 
-       :on-change (fn [e]
-                    (re-frame/dispatch [::events/change-checked-map row e key]))])))
+       :on-change (fn [e] (re-frame/dispatch [::events/change-checked-map row e key table-key]))])))
 
-(defn CheckAll []
-  (let [check-all? (re-frame/subscribe [::subs/check-all?])]
+(defn CheckAll [{:keys [table-key]}]
+  (let [check-all? (re-frame/subscribe [::subs/check-all? table-key])]
     (fn []
       [checkbox
        :model @check-all?
-       :on-change (fn [e]
-                    (re-frame/dispatch [::events/check-all e]))])))
+       :on-change (fn [e] (re-frame/dispatch [::events/check-all e table-key]))])))
 
-(defn CheckOptions []
-  (let [checked-map (re-frame/subscribe [::subs/checked-map])]
+(defn CheckOptions [{:keys [table-key]}]
+  (let [checked-map (re-frame/subscribe [::subs/checked-map table-key])]
     [h-box
      :gap "10px"
      :children [[button

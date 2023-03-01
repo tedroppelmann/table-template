@@ -19,6 +19,7 @@
 
 (defn init []
   (re-frame/dispatch-sync [::events/initialize-db])
-  (re-frame/dispatch [::events/create-query])
+  (re-frame/dispatch [::events/create-query-my-server :my-server])
+  (re-frame/dispatch [::events/create-beer-data :beers])
   (dev-setup)
   (mount-root))

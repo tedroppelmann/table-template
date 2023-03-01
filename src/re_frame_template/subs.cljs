@@ -4,28 +4,28 @@
 
 (re-frame/reg-sub
  ::data
- (fn [db]
-   (:data db)))
+ (fn [db [_ table-key]]
+   (get-in db [:resources (get-in db [:tables table-key :data-key]) :data])))
 
 (re-frame/reg-sub
  ::data-loading?
- (fn [db _]
-   (:data-loading? db)))
+ (fn [db [_ table-key]]
+   (get-in db [:resources (get-in db [:tables table-key :data-key]) :data-loading?])))
 
 (re-frame/reg-sub
  ::sort-by
- (fn [db _]
-   (-> db :query-map :sort-by)))
+ (fn [db [_ table-key]]
+   (get-in db [:tables table-key :query-map :sort-by])))
 
 (re-frame/reg-sub
  ::page-number
- (fn [db _]
-   (-> db :query-map :page-number)))
+ (fn [db [_ table-key]]
+   (get-in db [:tables table-key :query-map :page-number])))
 
 (re-frame/reg-sub
  ::page-size
- (fn [db _]
-   (-> db :query-map :page-size)))
+ (fn [db [_ table-key]]
+   (get-in db [:tables table-key :query-map :page-size])))
 
 (re-frame/reg-sub
  ::query-map
@@ -34,10 +34,13 @@
 
 (re-frame/reg-sub
  ::checked-map
- (fn [db _]
-   (-> db :checked-map)))
+ (fn [db [_ table-key]]
+   (-> db :checked-map)
+   (get-in db [:tables table-key :checked-map])))
 
 (re-frame/reg-sub
  ::check-all?
- (fn [db _]
-   (-> db :check-all?)))
+ (fn [db [_ table-key]]
+   (get-in db [:tables table-key :check-all?])))
+
+

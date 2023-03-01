@@ -44,7 +44,7 @@
                 (let [new-selection (first (filter #(= (:key %) e) (-> @filter-state :filter-options)))] ;;Could be better
                   (swap! filter-state assoc :dropdown-selection new-selection)))])
 
-(defn FilterConfirmation [{:keys [filter-state]}]
+(defn FilterConfirmation [{:keys [filter-state table-key]}]
   [h-box
    :gap "10px"
    :justify :end
@@ -52,7 +52,7 @@
                :label "Cancel"
                :class "btn-danger"
                :on-click (fn []
-                           (re-frame/dispatch [::events/cancel-filter (-> @filter-state :filter-field-selected :accessor)])
+                           (re-frame/dispatch [::events/cancel-filter (-> @filter-state :filter-field-selected :accessor) table-key])
                            (swap! filter-state assoc
                                   :filter-input ""
                                   :filter-input-max ""
@@ -65,8 +65,7 @@
                                        (= (-> @filter-state :filter-input-max) "")))
                            true
                            false)
-               :on-click (fn []
-                           (re-frame/dispatch [::events/filter @filter-state]))]]])
+               :on-click (fn [] (re-frame/dispatch [::events/filter @filter-state table-key]))]]])
 
 (defn FilterFieldSelector [{:keys [filter-state filter-fields]}]
   [:div.btn-group.dropend.ml-2.align-self-start
@@ -83,7 +82,6 @@
               :on-click (fn []
                           (let [options (filter #(contains? (set (:types %)) (:type filter-field)) filter-options)
                                 previous-filter-field-key (-> @filter-state :filter-field-selected :accessor)]
-                            ;; (re-frame/dispatch [::events/cancel-filter (-> @filter-state :filter-field-selected :accessor)])
                             (swap! filter-state assoc 
                                    :filter-input ""
                                    :filter-input-max "" 
@@ -95,7 +93,7 @@
              (:label filter-field)])
           filter-fields))])
 
-(defn FilterBox [filter-fields]
+(defn FilterBox [{:keys [filter-fields table-key]}]
   (let [options (filter #(contains? (set (:types %)) (:type (first filter-fields))) filter-options)
         filter-state (r/atom {:filter-input ""
                               :filter-input-max ""
@@ -112,10 +110,14 @@
                    :children [[v-box
                                :gap "10px"
                                :style {:flex 1}
-                               :children [[FilterInput {:filter-state filter-state :filter-input-type-key :filter-input}]
+                               :children [[FilterInput {:filter-state filter-state 
+                                                        :filter-input-type-key :filter-input}]
                                           [FilterDropdown {:filter-state filter-state}]
                                           (when (-> @filter-state :dropdown-selection :two-inputs)
-                                            [FilterInput {:filter-state filter-state :filter-input-type-key :filter-input-max}])
-                                          [FilterConfirmation {:filter-state filter-state}]]]
+                                            [FilterInput {:filter-state filter-state 
+                                                          :filter-input-type-key :filter-input-max}])
+                                          [FilterConfirmation {:filter-state filter-state 
+                                                               :table-key table-key}]]]
                               (when (< 1 (count filter-fields))
-                                [FilterFieldSelector {:filter-state filter-state :filter-fields filter-fields}])]]]])))
+                                [FilterFieldSelector {:filter-state filter-state 
+                                                      :filter-fields filter-fields}])]]]])))

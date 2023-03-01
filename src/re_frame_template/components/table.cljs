@@ -12,22 +12,15 @@
    [re-com.core :refer [throbber h-box box v-box]]))
 
 
-(defn Print []
-  [:div
-   [:input
-    {:type "button"
-     :value "Print filter params"
-     :on-click #(re-frame/dispatch [::events/print])}]
-   (let [query-map (re-frame/subscribe [::subs/query-map])] 
-     [:p (str @query-map)])])
-
-(defn Row [{:keys [row columns checkable? SubComponent colspan]}]
-  (let [row-state (r/atom {:is-expanded? false})] 
+(defn Row [{:keys [row columns checkable? SubComponent table-key]}]
+  (let [row-state (r/atom {:is-expanded? false})
+        colspan (+ (count columns) (if checkable? 2 1))
+        row-key (keyword (str (random-uuid)))]
     (fn []
       [:<>
        (into [:tr
-              (when SubComponent [:td [collapse/CollapseButton {:row-state row-state}]])
-              (when checkable? [:td [checkbox/CheckBox {:row row}]])]
+              (when SubComponent [:td [collapse/CollapseButton {:row-state row-state :row-key row-key}]])
+              (when checkable? [:td [checkbox/CheckBox {:row row :table-key table-key}]])]
              (map
               (fn [column]
                 [:td
@@ -36,13 +29,13 @@
                    ((:accessor column) row))])
               columns))
        (when (:is-expanded? @row-state)
-         [:tr [:td {:colSpan colspan} [SubComponent {:row row}]]])])))
+         [:tr [:td {:colSpan colspan} [collapse/ExtendedComponent {:row-key row-key :row row :SubComponent SubComponent}]]])])))
 
 (defn Footer [{:keys [columns data checkable? SubComponent]}]
   [:tfoot
-   (into [:tr 
+   (into [:tr
           (when SubComponent [:td])
-          (when checkable? [:td])] 
+          (when checkable? [:td])]
          (map
           (fn [column]
             [:td
@@ -50,11 +43,11 @@
                [(:Footer column) {:column column :data data}])])
           columns))])
 
-(defn Header [{:keys [columns checkable? :SubComponent]}] 
+(defn Header [{:keys [columns checkable? SubComponent table-key]}]
   [:thead
-   (into [:tr 
+   (into [:tr
           (when SubComponent [:th {:style {:width "50px"}}])
-          (when checkable? [:th {:style {:width "150px"}} [checkbox/CheckAll]])] 
+          (when checkable? [:th {:style {:width "150px"}} [checkbox/CheckAll {:table-key table-key}]])]
          (map
           (fn [column]
             (let [{:keys [sorted?] :or {sorted? true}} column]
@@ -67,45 +60,67 @@
                            (when sorted?
                              [box
                               :align-self :end
-                              :child [sorter/SortButton {:column column}]])]]]))
+                              :child [sorter/SortButton {:column column :table-key table-key}]])]]]))
           columns))
-   (into [:tr 
-          (when SubComponent [:th])
-          (when checkable? [:th [checkbox/CheckOptions]])]
-         (map
-          (fn [column]
-            [:th
-             (when (:filter-fields column)
-               [filter/FilterBox (:filter-fields column)])])
-          columns))])
+   (when (or checkable? (some #(:filter-fields %) columns))
+     (into [:tr
+            (when SubComponent [:th])
+            (when checkable? [:th [checkbox/CheckOptions {:table-key table-key}]])]
+           (map
+            (fn [column]
+              [:th
+               (when (:filter-fields column)
+                 [filter/FilterBox {:filter-fields (:filter-fields column) :table-key table-key}])])
+            columns)))])
 
-
-(defn Table [{:keys [data columns checkable? SubComponent] :or {checkable? true}}]
-  (let [columns-filtered (filter #(not (:hidden? %)) columns)
-        loading? (re-frame/subscribe [::subs/data-loading?])
-        colspan (+ (count columns) (if checkable? 2 1))] 
+(defn Body [{:keys [table-key columns checkable? SubComponent]}]
+  (let [data (re-frame/subscribe [::subs/data table-key])
+        loading? (re-frame/subscribe [::subs/data-loading? table-key])]
     (fn []
-      (js/console.log "RENDER TABLE")
-      (js/console.log (random-uuid))
+      [:<>
+       (when (not @loading?)
+         (into [:tbody]
+               (map
+                (fn [row]
+                  [Row {:row row
+                        :columns columns
+                        :checkable? checkable?
+                        :SubComponent SubComponent
+                        :table-key table-key}])
+                @data)))
+       (when (and (not @loading?) (seq @data))
+         [Footer {:columns columns :data @data :checkable? checkable? :SubComponent SubComponent}])])))
+
+(defn WaitingComponent [{:keys [table-key]}]
+  (let [data (re-frame/subscribe [::subs/data table-key])
+        loading? (re-frame/subscribe [::subs/data-loading? table-key])]
+    (fn []
+      (if (or @loading? (nil? @loading?))
+        [:div
+         {:style {:display "flex" :justify-content "center"}}
+         [throbber :size :large]]
+        (when (empty? @data)
+          [:h3.text-center "No data"])))))
+
+(defn Table [{:keys [data-key columns checkable? SubComponent pagination?] :or {checkable? true pagination? true}}]
+  (let [table-key data-key
+        columns-filtered (filter #(not (:hidden? %)) columns)]
+    (fn []
+      (js/console.log (str "RENDER TABLE " table-key))
+      (re-frame/dispatch [::events/create-new-table table-key])
       [:div
-       [Print]
        [v-box
-        :children [[box
-                    :align-self :end
-                    :child [pagination/Pagination {:data @data}]]
+        :children [(when pagination?
+                     [box
+                      :align-self :end
+                      :child [pagination/Pagination {:table-key table-key}]])
                    [:table.table {:style {:table-layout "fixed" :width "100%"}}
-                    [Header {:columns columns-filtered :checkable? checkable? :SubComponent SubComponent}]
-                    (when (not @loading?)
-                      (into [:tbody]
-                            (map
-                             (fn [row] 
-                               [Row {:row row :columns columns-filtered :checkable? checkable? :SubComponent SubComponent :colspan colspan}])
-                             @data)))
-                    (when (and (not @loading?) (seq @data))
-                      [Footer {:columns columns-filtered :data @data :checkable? checkable? :SubComponent SubComponent}])]
-                   (if @loading?
-                     [:div
-                      {:style {:display "flex" :justify-content "center"}}
-                      [throbber :size :large]]
-                     (when (empty? @data)
-                       [:h3.text-center "No data"]))]]])))
+                    [Header {:columns columns-filtered
+                             :checkable? checkable?
+                             :SubComponent SubComponent
+                             :table-key table-key}]
+                    [Body {:columns columns-filtered
+                           :checkable? checkable?
+                           :SubComponent SubComponent
+                           :table-key table-key}]]
+                   [WaitingComponent {:table-key table-key}]]]])))

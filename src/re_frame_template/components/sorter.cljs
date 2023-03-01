@@ -6,8 +6,8 @@
    [re-com.core :refer [button]]))
 
 
-(defn SortButton [{:keys [column]}]
-  (let [sort-by (re-frame/subscribe [::subs/sort-by])
+(defn SortButton [{:keys [column table-key]}]
+  (let [sort-by (re-frame/subscribe [::subs/sort-by table-key])
         accessor (:accessor column)]
     (fn []
       (let [value-map (if (accessor @sort-by)
@@ -19,4 +19,4 @@
          :label  (:label value-map)
          :class (:class value-map)
          :tooltip "Sort button"
-         :on-click (fn [] (re-frame/dispatch [::events/sort accessor (:next-click value-map)]))]))))
+         :on-click (fn [] (re-frame/dispatch [::events/sort accessor (:next-click value-map) table-key]))]))))

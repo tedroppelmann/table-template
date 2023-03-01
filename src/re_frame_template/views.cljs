@@ -1,9 +1,7 @@
 (ns re-frame-template.views
   (:require 
    [re-frame-template.components.table :as table]
-   [react-number-format :refer (NumericFormat)]
-   [re-frame.core :as re-frame]
-   [re-frame-template.subs :as subs]))
+   [react-number-format :refer (NumericFormat)]))
 
 (defn MyHeader [{:keys [headers]}]
   (into [:div]
@@ -90,28 +88,25 @@
 (defn main-panel []
   [:div.container
    [:h1.text-center "Beers of the World"] 
-   [table/Table {:data (re-frame/subscribe [::subs/data])
-                 :columns columns
-                 ;; :checkable? false
-                 :SubComponent (fn [{:keys [row]}] 
-                                 [:table.table.table-striped.table-sm 
-                                  {:style {:table-layout "fixed" :width "100%" :text-align "center"}}
-                                  [:thead
-                                   [:tr
-                                    [:th "ABV"]
-                                    [:th "Target FG"]
-                                    [:th "Target OG"]
-                                    [:th "EBC"]
-                                    [:th "SRM"]
-                                    [:th "pH"]
-                                    [:th "Attenuation level"]]]
-                                  [:tbody
-                                   [:tr
-                                    [:td (:abv row)]
-                                    [:td (:target_fg row)]
-                                    [:td (:target_og row)]
-                                    [:td (:ebc row)]
-                                    [:td (:srm row)]
-                                    [:td (:ph row)]
-                                    [:td (:attenuation_level row)]]]])
-                 }]])
+   [table/Table {:data-key :beers
+                  :columns columns
+                  :SubComponent (fn [{:keys [row-key]}]
+                                  [:<>
+                                   [table/Table {:data-key row-key
+                                                  :checkable? false
+                                                  :pagination? false
+                                                  :columns [{:Header (MyHeader {:headers ["ABV"]})
+                                                             :accessor :abv
+                                                             :sorted? false}
+                                                            {:Header (MyHeader {:headers ["Target FG"]})
+                                                             :accessor :target_fg
+                                                             :sorted? false}
+                                                            {:Header (MyHeader {:headers ["EBC"]})
+                                                             :accessor :ebc
+                                                             :sorted? false}
+                                                            {:Header (MyHeader {:headers ["SRM"]})
+                                                             :accessor :srm
+                                                             :sorted? false}
+                                                            {:Header (MyHeader {:headers ["pH"]})
+                                                             :accessor :ph
+                                                             :sorted? false}]}]])}]])
