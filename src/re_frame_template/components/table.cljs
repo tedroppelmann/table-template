@@ -103,11 +103,12 @@
           [:h3.text-center "No data"])))))
 
 (defn Table [{:keys [data-key columns checkable? SubComponent pagination?] :or {checkable? true pagination? true}}]
-  (let [table-key data-key
+  (let [table-key (keyword (str (random-uuid)))
         columns-filtered (filter #(not (:hidden? %)) columns)]
     (fn []
       (js/console.log (str "RENDER TABLE " table-key))
-      (re-frame/dispatch [::events/create-new-table {:table-key table-key}])
+      (re-frame/dispatch [::events/create-new-table {:table-key table-key
+                                                     :data-key data-key}])
       [:div
        [v-box
         :children [(when pagination?

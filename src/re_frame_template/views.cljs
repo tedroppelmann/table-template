@@ -21,8 +21,8 @@
              [:br]
              (:seller_rating row)
              [:br]
-             (:seller_iva row)])
-    }
+             (:seller_iva row)])}
+    
    {:Header (MyHeader {:headers ["Debitore" "Rating" "IVA"]})
     :accessor :debtor_name
     :Cell (fn [{:keys [row value]}]
@@ -31,8 +31,8 @@
              [:br]
              (:debtor_rating row)
              [:br]
-             (:debtor_iva row)])
-    }
+             (:debtor_iva row)])}
+    
    {:Header (MyHeader {:headers ["Email referente" "Nome referente" "Telefono referente"]})
     :accessor :email_referente
     :Cell (fn [{:keys [row value]}]
@@ -41,14 +41,12 @@
              [:br]
              (:nome_referente row)
              [:br]
-             (:telefono_referente row)])
-    }
-   ])
+             (:telefono_referente row)])}])
 
 (defonce columns
   [{:Header (MyHeader {:headers ["Id"]})
-    :accessor :id
-    }
+    :accessor :id}
+    
    {:Header (MyHeader {:headers ["Name" "First brewed"]})
     :accessor :name
     :filter-fields [{:label "Name" :accessor :name :type "text"}
@@ -57,8 +55,8 @@
             [:div
              value
              [:p]
-             [:button.btn.btn-primary (:first_brewed row)]])
-    }
+             [:button.btn.btn-primary (:first_brewed row)]])}
+    
    {:Header (MyHeader {:headers ["IBU"]}) 
     :accessor :ibu
     :filter-fields [{:label "IBU" :accessor :ibu :type "number"}] 
@@ -74,8 +72,8 @@
                     average (/ numerator denominator)]
                 (fn []
                   [:div
-                   [:div (str "IBU Average: " average)]])))
-    }
+                   [:div (str "IBU Average: " average)]])))}
+    
    {:Header (MyHeader {:headers ["Tagline" "Brewers tips"]})
     :accessor :tagline
     :sorted? false
@@ -84,38 +82,36 @@
             [:div
              value
              [:p]
-             (:brewers_tips row)])
-    }])
+             (:brewers_tips row)])}])
 
 (defn main-panel []
   [:div.container
    [:h1.text-center "Beers of the World"] 
-   [table/Table {:data-key :beers
-                  :columns columns
-                  :SubComponent (fn [{:keys [row-key]}]
-                                  (let [data-key (keyword (str (random-uuid)))]
-                                    (fn []
-                                      (re-frame/dispatch [::events/create-query-my-server {:data-key data-key}])
-                                      [:<>
-                                       [table/Table {:data-key data-key
-                                                     :checkable? false
-                                                     :pagination? false
-                                                     :columns columns2}]
-                                       [table/Table {:data-key row-key
-                                                     :checkable? false
-                                                     :pagination? false
-                                                     :columns [{:Header (MyHeader {:headers ["ABV"]})
-                                                                :accessor :abv
-                                                                :sorted? false}
-                                                               {:Header (MyHeader {:headers ["Target FG"]})
-                                                                :accessor :target_fg
-                                                                :sorted? false}
-                                                               {:Header (MyHeader {:headers ["EBC"]})
-                                                                :accessor :ebc
-                                                                :sorted? false}
-                                                               {:Header (MyHeader {:headers ["SRM"]})
-                                                                :accessor :srm
-                                                                :sorted? false}
-                                                               {:Header (MyHeader {:headers ["pH"]})
-                                                                :accessor :ph
-                                                                :sorted? false}]}]])))}]])
+   [table/Table {:data-key [:beers] 
+                 :columns columns
+                 :SubComponent (fn [{:keys [row-key row]}]
+                                 (re-frame/dispatch [::events/create-beer-data {:data-key [row-key :beers]}])
+                                 (re-frame/dispatch [::events/add-row-subcomponent {:data-key [row-key :row] :row row}])
+                                 [:<>
+                                  [table/Table {:data-key [row-key :row]
+                                                :checkable? false
+                                                :pagination? false
+                                                :columns [{:Header (MyHeader {:headers ["ABV"]})
+                                                           :accessor :abv
+                                                           :sorted? false}
+                                                          {:Header (MyHeader {:headers ["Target FG"]})
+                                                           :accessor :target_fg
+                                                           :sorted? false}
+                                                          {:Header (MyHeader {:headers ["EBC"]})
+                                                           :accessor :ebc
+                                                           :sorted? false}
+                                                          {:Header (MyHeader {:headers ["SRM"]})
+                                                           :accessor :srm
+                                                           :sorted? false}
+                                                          {:Header (MyHeader {:headers ["pH"]})
+                                                           :accessor :ph
+                                                           :sorted? false}]}]
+                                  [table/Table {:data-key [row-key :beers]
+                                                :checkable? false
+                                                :pagination? false
+                                                :columns columns}]])}]])

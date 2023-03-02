@@ -5,12 +5,12 @@
 (re-frame/reg-sub
  ::data
  (fn [db [_ table-key]]
-   (get-in db [:resources (get-in db [:tables table-key :data-key]) :data])))
+   (get-in db (vec (flatten [:resources (get-in db [:tables table-key :data-key]) :data])))))
 
 (re-frame/reg-sub
  ::data-loading?
  (fn [db [_ table-key]]
-   (get-in db [:resources (get-in db [:tables table-key :data-key]) :data-loading?])))
+   (get-in db (vec (flatten [:resources (get-in db [:tables table-key :data-key]) :data-loading?])))))
 
 (re-frame/reg-sub
  ::sort-by

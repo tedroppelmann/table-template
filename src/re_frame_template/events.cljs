@@ -13,7 +13,8 @@
 (re-frame/reg-event-fx
  ::handler-with-http
  (fn [{:keys [db]} [_ {:keys [url data-key]}]]
-   {:db   (assoc-in db [:resources data-key :data-loading?] true)
+   (js/console.log (str "Making request: " url))
+   {:db   (assoc-in db (vec (flatten [:resources data-key :data-loading?])) true)
     :http-xhrio {:method          :get
                  :uri             url
                  :timeout         8000
@@ -24,8 +25,8 @@
 (re-frame/reg-event-db
  ::success-http-result
  (fn [db [_ data-key result]]
-   (assoc-in db [:resources data-key] {:data result
-                                       :data-loading? false})))
+   (assoc-in db (vec (flatten [:resources data-key])) {:data result 
+                                                       :data-loading? false})))
 
 (re-frame/reg-event-db
  ::failure-http-result
@@ -40,9 +41,10 @@
 
 (re-frame/reg-event-fx
  ::create-beer-data
- (fn [{:keys [_]} [_ {:keys [data-key]}]]
-   {:dispatch [::handler-with-http {:url "https://api.punkapi.com/v2/beers?page=1&per_page=10" 
-                                    :data-key data-key}]}))
+ (fn [{:keys [db]} [_ {:keys [data-key]}]]
+   (when-not (get-in db (vec (flatten [:resources data-key])))
+     {:dispatch [::handler-with-http {:url "https://api.punkapi.com/v2/beers?page=1&per_page=10" 
+                                      :data-key data-key}]})))
 
 (re-frame/reg-event-fx
  ::create-query
@@ -138,7 +140,7 @@
    (if bool
      (update-in db [:tables table-key] 
                 assoc 
-                :checked-map (into {} (map (fn [row] {(keyword (str (:id row))) {:row row}}) (get-in db [:resources (get-in db [:tables table-key :data-key]) :data])))
+                :checked-map (into {} (map (fn [row] {(keyword (str (:id row))) {:row row}}) (get-in db (vec (flatten [:resources (get-in db [:tables table-key :data-key]) :data])))))
                 :check-all? true)
      (update-in db [:tables table-key] 
                 assoc 
@@ -155,8 +157,8 @@
 
 (re-frame/reg-event-db
  ::create-new-table
- (fn [db [_ {:keys [table-key]}]]
-   (assoc-in db [:tables table-key] {:data-key table-key
+ (fn [db [_ {:keys [table-key data-key]}]]
+   (assoc-in db [:tables table-key] {:data-key data-key
                                      :query-map {:filter-by {} :sort-by {:id {:field-name "id", :order "asc"}} :page-number 1 :page-size 10}
                                      :checked-map {}
                                      :check-all? false
@@ -164,11 +166,13 @@
 
 (re-frame/reg-event-db
  ::add-row-subcomponent
- (fn [db [_ {:keys [row-key row]}]]
-   (assoc-in db [:resources row-key] {:data [row] 
-                                      :data-loading? false})))
+ (fn [db [_ {:keys [data-key row]}]]
+   (when-not (get-in db (vec (flatten [:resources data-key])))
+     (assoc-in db (vec (flatten [:resources data-key])) {:data [row] 
+                                                         :data-loading? false}))))
 
 (re-frame/reg-event-db
- ::delete-row-subcomponent
+ ::add-row-resource
  (fn [db [_ {:keys [row-key]}]]
-   (update-in db [:tables] dissoc row-key)))
+   (when-not (get-in db [:resources row-key])
+     (assoc-in db [:resources row-key] {}))))
