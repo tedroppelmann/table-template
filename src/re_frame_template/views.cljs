@@ -90,7 +90,9 @@
    [table/Table {:data-key [:beers] 
                  :columns columns
                  :SubComponent (fn [{:keys [row-key row]}]
-                                 (re-frame/dispatch [::events/create-beer-data {:data-key [row-key :beers]}])
+                                 ;; (re-frame/dispatch [::events/create-beer-data {:data-key [row-key :beers]}])
+                                 ;; (re-frame/dispatch [::events/create-query-my-server {:data-key [row-key :my-server]}])
+                                 ;; (re-frame/dispatch [::events/create-query-my-server {:data-key [row-key :my-server2]}])
                                  (re-frame/dispatch [::events/add-row-subcomponent {:data-key [row-key :row] :row row}])
                                  [:<>
                                   [table/Table {:data-key [row-key :row]
@@ -110,8 +112,4 @@
                                                            :sorted? false}
                                                           {:Header (MyHeader {:headers ["pH"]})
                                                            :accessor :ph
-                                                           :sorted? false}]}]
-                                  [table/Table {:data-key [row-key :beers]
-                                                :checkable? false
-                                                :pagination? false
-                                                :columns columns}]])}]])
+                                                           :sorted? false}]}]])}]])

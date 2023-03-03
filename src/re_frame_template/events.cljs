@@ -35,9 +35,10 @@
 
 (re-frame/reg-event-fx
  ::create-query-my-server
- (fn [{:keys [_]} [_ {:keys [data-key]}]]
-   {:dispatch [::handler-with-http {:url "http://localhost:8080/" 
-                                    :data-key data-key}]}))
+ (fn [{:keys [db]} [_ {:keys [data-key]}]] 
+   (when-not (get-in db (vec (flatten [:resources data-key])))
+     {:dispatch [::handler-with-http {:url "http://localhost:8080/" 
+                                    :data-key data-key}]})))
 
 (re-frame/reg-event-fx
  ::create-beer-data
